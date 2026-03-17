@@ -1,0 +1,1504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ouja Residence — Contract Form</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Tajawal:wght@300;400;500;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════ */
+:root {
+  --green:       #1A6B3C;
+  --green-dark:  #134E2D;
+  --green-mid:   #2D7D52;
+  --green-light: #EAF5EF;
+  --green-pale:  #F2FAF6;
+  --bg:          #E9EFEA;
+  --white:       #FFFFFF;
+  --text:        #111827;
+  --muted:       #6B7280;
+  --muted2:      #9CA3AF;
+  --border:      #D1D5DB;
+  --border-focus:#1A6B3C;
+  --card-shadow: 0 2px 16px rgba(0,0,0,0.07);
+  --red:         #DC2626;
+  --radius:      12px;
+  --radius-sm:   8px;
+  --radius-pill: 999px;
+}
+
+/* ═══════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  font-family: 'Inter', -apple-system, sans-serif;
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ═══════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════ */
+.header {
+  background: var(--white);
+  border-bottom: 2px solid var(--green);
+  padding: 16px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-brand {}
+.header-brand .name {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: var(--green);
+  text-transform: uppercase;
+}
+.header-brand .sub {
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 2.5px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-top: 1px;
+}
+.header-ar {
+  font-family: 'Tajawal', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+  direction: rtl;
+}
+
+/* ═══════════════════════════════════════════
+   WIZARD WRAPPER
+═══════════════════════════════════════════ */
+.wizard {
+  max-width: 700px;
+  margin: 40px auto 80px;
+  padding: 0 20px;
+}
+
+/* ═══════════════════════════════════════════
+   PROGRESS BAR
+═══════════════════════════════════════════ */
+.progress-bar {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 36px;
+}
+.pb-seg {
+  flex: 1;
+  height: 5px;
+  border-radius: var(--radius-pill);
+  background: #D1D5DB;
+  transition: background 0.3s;
+}
+.pb-seg.done    { background: var(--green); }
+.pb-seg.current { background: var(--green-mid); opacity: 0.65; }
+
+/* ═══════════════════════════════════════════
+   STEP HEADER
+═══════════════════════════════════════════ */
+.step-header { margin-bottom: 24px; }
+.step-counter {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--green);
+  margin-bottom: 6px;
+}
+.step-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.3px;
+}
+.step-title-ar {
+  font-family: 'Tajawal', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--muted);
+  margin-top: 3px;
+  direction: rtl;
+  text-align: left;
+}
+
+/* ═══════════════════════════════════════════
+   CARD
+═══════════════════════════════════════════ */
+.card {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  padding: 28px 32px;
+  margin-bottom: 4px;
+}
+
+/* ═══════════════════════════════════════════
+   FIELD GROUPS
+═══════════════════════════════════════════ */
+.field-row {
+  display: grid;
+  gap: 20px;
+}
+.field-row.two-col { grid-template-columns: 1fr 1fr; }
+.field-row.one-col { grid-template-columns: 1fr; }
+.field-row + .field-row { margin-top: 20px; }
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+
+.field label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.field label .req { color: var(--red); margin-left: 2px; }
+.field label .ar-lbl {
+  font-family: 'Tajawal', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--muted);
+  margin-left: 6px;
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  appearance: none;
+}
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(26,107,60,0.10);
+}
+.field input::placeholder,
+.field textarea::placeholder { color: var(--muted2); }
+.field select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+.field textarea { min-height: 90px; resize: vertical; line-height: 1.6; }
+.field .hint {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+/* ═══════════════════════════════════════════
+   PILL TOGGLES (multi-select chips)
+═══════════════════════════════════════════ */
+.pill-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 2px;
+}
+.pill-group input[type="checkbox"],
+.pill-group input[type="radio"] { display: none; }
+.pill-group label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  user-select: none;
+  letter-spacing: 0;
+  text-transform: none;
+  background: var(--white);
+}
+.pill-group label:hover {
+  border-color: var(--green);
+  color: var(--green);
+}
+.pill-group input:checked + label {
+  border-color: var(--green);
+  background: var(--green-light);
+  color: var(--green-dark);
+  font-weight: 600;
+}
+.pill-group .pill-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  flex-shrink: 0;
+  display: inline-block;
+}
+input:checked + label .pill-dot {
+  background: var(--green);
+  border-color: var(--green);
+}
+
+/* ═══════════════════════════════════════════
+   LOCKED INFO BOX
+═══════════════════════════════════════════ */
+.info-box {
+  background: var(--green-pale);
+  border: 1px solid #A7D8BB;
+  border-radius: var(--radius-sm);
+  padding: 16px 20px;
+  margin-top: 16px;
+}
+.info-box .ib-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--green-mid);
+  margin-bottom: 10px;
+}
+.info-box .ib-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 4px 0;
+  border-bottom: 1px solid #C8E8D6;
+}
+.info-box .ib-row:last-child { border-bottom: none; }
+.info-box .ib-key {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--green-dark);
+}
+.info-box .ib-val {
+  font-size: 11.5px;
+  color: var(--text);
+  text-align: right;
+}
+
+/* ═══════════════════════════════════════════
+   MULTI-PROPERTY TABLE
+═══════════════════════════════════════════ */
+.prop-tbl-wrap { overflow-x: auto; }
+.prop-entry-tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.prop-entry-tbl thead th {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.prop-entry-tbl tbody tr { border-bottom: 1px solid #F3F4F6; }
+.prop-entry-tbl tbody tr:last-child { border-bottom: none; }
+.prop-entry-tbl td { padding: 8px 6px; vertical-align: middle; }
+.prop-entry-tbl td input,
+.prop-entry-tbl td select {
+  width: 100%;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12.5px;
+  color: var(--text);
+  outline: none;
+}
+.prop-entry-tbl td input:focus,
+.prop-entry-tbl td select:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 2px rgba(26,107,60,0.10);
+}
+.btn-del-row {
+  background: none;
+  border: none;
+  color: #EF4444;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+.btn-del-row:hover { background: #FEF2F2; }
+.btn-add-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+  padding: 9px 18px;
+  border: 1.5px dashed var(--green);
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--green);
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-add-row:hover { background: var(--green-pale); }
+
+/* ═══════════════════════════════════════════
+   COST ITEMS (cleaning summary)
+═══════════════════════════════════════════ */
+.fee-preview {
+  background: var(--green-pale);
+  border-radius: var(--radius-sm);
+  padding: 16px 20px;
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.fee-preview .fp-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--green-mid);
+}
+.fee-preview .fp-amount {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--green);
+}
+.fee-preview .fp-sub {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* ═══════════════════════════════════════════
+   REVIEW SUMMARY
+═══════════════════════════════════════════ */
+.review-section + .review-section { margin-top: 20px; }
+.review-section .rs-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: 10px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid var(--border);
+}
+.review-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.rv-item { display: flex; flex-direction: column; gap: 2px; }
+.rv-key {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.rv-val {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text);
+  word-break: break-all;
+}
+.rv-empty { color: var(--muted2); font-style: italic; }
+
+/* ═══════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════ */
+.nav-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 28px;
+}
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: 'Inter', sans-serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-back:hover { border-color: #9CA3AF; }
+.btn-back:disabled { opacity: 0.3; cursor: not-allowed; }
+.btn-next {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  background: var(--green);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: 'Inter', sans-serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--white);
+  cursor: pointer;
+  transition: background 0.15s;
+  box-shadow: 0 2px 8px rgba(26,107,60,0.25);
+}
+.btn-next:hover { background: var(--green-dark); }
+.btn-generate {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 32px;
+  background: var(--green);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--white);
+  cursor: pointer;
+  transition: background 0.15s;
+  box-shadow: 0 4px 14px rgba(26,107,60,0.3);
+}
+.btn-generate:hover { background: var(--green-dark); }
+
+/* ═══════════════════════════════════════════
+   STEP VISIBILITY
+═══════════════════════════════════════════ */
+.step { display: none; }
+.step.active { display: block; }
+
+/* ═══════════════════════════════════════════
+   CONTRACT PREVIEW PAGE
+═══════════════════════════════════════════ */
+#preview-page { display: none; }
+#preview-page.visible { display: block; }
+
+/* Preview top bar — matches the form header exactly */
+.preview-topbar {
+  background: var(--white);
+  border-bottom: 2px solid var(--green);
+  padding: 16px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.ptb-brand .ptb-name {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: var(--green);
+  text-transform: uppercase;
+}
+.ptb-brand .ptb-sub {
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 2.5px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-top: 1px;
+}
+.preview-topbar .ptb-actions { display: flex; gap: 10px; align-items: center; }
+
+.cv-outer {
+  max-width: 860px;
+  margin: 32px auto 60px;
+  padding: 0 20px;
+}
+.cv-wrap {
+  background: var(--white);
+  box-shadow: var(--card-shadow);
+  border-radius: var(--radius);
+  padding: 44px 56px;
+  font-family: 'EB Garamond', Georgia, serif;
+}
+
+/* Contract cover */
+.cv-logo-block {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2.5px solid var(--green);
+  padding-bottom: 16px;
+  margin-bottom: 24px;
+}
+.cv-logo-left {}
+.cv-company {
+  font-family: 'Inter', sans-serif;
+  font-weight: 900;
+  font-size: 22pt;
+  letter-spacing: 7px;
+  color: var(--green);
+  text-transform: uppercase;
+}
+.cv-company-sub {
+  font-family: 'Inter', sans-serif;
+  font-weight: 300;
+  font-size: 7.5pt;
+  letter-spacing: 4px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-top: 3px;
+}
+.cv-logo-ar {
+  font-family: 'Amiri', serif;
+  font-size: 13pt;
+  color: var(--green);
+  direction: rtl;
+  text-align: right;
+  font-weight: 700;
+}
+.cv-logo-ar-sub {
+  font-family: 'Tajawal', sans-serif;
+  font-size: 8pt;
+  color: var(--muted);
+  direction: rtl;
+  text-align: right;
+  margin-top: 3px;
+}
+.cv-title-box {
+  border: 2px solid var(--green);
+  border-radius: 8px;
+  padding: 20px 28px;
+  text-align: center;
+  margin-bottom: 22px;
+  background: var(--green-pale);
+}
+.cv-title-en {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 11pt;
+  letter-spacing: 3px;
+  color: var(--green-dark);
+  text-transform: uppercase;
+}
+.cv-dash { color: var(--green-mid); margin: 6px 0; opacity: 0.5; }
+.cv-title-ar {
+  font-family: 'Amiri', serif;
+  font-size: 13pt;
+  color: var(--green-dark);
+  direction: rtl;
+}
+.cv-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid #C9E0D1;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.cv-meta-cell {
+  padding: 14px 18px;
+  border-right: 1px solid #C9E0D1;
+  background: var(--green-pale);
+}
+.cv-meta-cell:last-child { border-right: none; }
+.cv-meta-lbl {
+  font-family: 'Inter', sans-serif;
+  font-size: 7.5pt;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--green-mid);
+}
+.cv-meta-val {
+  font-size: 11pt;
+  color: var(--green-dark);
+  margin-top: 4px;
+  font-weight: 600;
+}
+.cv-meta-val.empty { color: #AAAAAA; font-style: italic; }
+
+/* Contract sections */
+.ct-sec-hdr {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 14px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.ct-sec-hdr td {
+  background: var(--green);
+  border: 1px solid var(--green-dark);
+  padding: 10px 16px;
+  width: 50%;
+}
+.ct-sec-en {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 8.5pt;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #FFFFFF;
+}
+.ct-sec-ar {
+  font-family: 'Amiri', serif;
+  font-weight: 700;
+  font-size: 10pt;
+  color: #FFFFFF;
+  text-align: right;
+  direction: rtl;
+}
+.ct-art-hdr {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+.ct-art-hdr td {
+  background: var(--green-light);
+  border: 1px solid #B5D9C3;
+  border-left: 3px solid var(--green);
+  padding: 8px 14px;
+  width: 50%;
+}
+.ct-art-hdr td:last-child {
+  border-left: 1px solid #B5D9C3;
+  border-right: 3px solid var(--green);
+}
+.ct-art-en {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 8pt;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--green-dark);
+}
+.ct-art-num { color: var(--green-mid); margin-right: 5px; opacity: 0.7; }
+.ct-art-ar {
+  font-family: 'Amiri', serif;
+  font-weight: 700;
+  font-size: 9.5pt;
+  color: var(--green-dark);
+  text-align: right;
+  direction: rtl;
+}
+.ct-art-num-ar { color: var(--green-mid); margin-left: 5px; opacity: 0.7; }
+
+.ct-bi {
+  width: 100%;
+  border-collapse: collapse;
+}
+.ct-bi td {
+  padding: 8px 13px;
+  width: 50%;
+  vertical-align: top;
+  border: 1px solid #E8EFEB;
+  font-size: 9pt;
+  line-height: 1.7;
+}
+.ct-en { font-family:'EB Garamond',serif; text-align:left; direction:ltr; color:#1A2E22; }
+.ct-ar { font-family:'Amiri',serif; text-align:right; direction:rtl; color:#1A2E22; font-size:9.5pt; }
+.ct-shade { background:#F4FAF7; }
+.ct-white { background:#FFFFFF; }
+.ct-bold { font-weight:700; color:var(--green-dark); }
+
+.fv-cv { color:var(--green-dark); font-weight:700; border-bottom:1.5px solid var(--green); }
+.fv-cv-e { color:#B0BEC5; font-style:italic; border-bottom:1px dashed #B0BEC5; }
+
+.ct-prop-tbl { width:100%; border-collapse:collapse; border-radius:8px; overflow:hidden; }
+.ct-prop-tbl th {
+  background: var(--green);
+  color:#FFF;
+  border:1px solid var(--green-dark);
+  padding:9px 11px;
+  text-align:left;
+}
+.ct-prop-tbl th .th-en { font-family:'Inter',sans-serif; font-weight:700; font-size:7.5pt; letter-spacing:1px; text-transform:uppercase; }
+.ct-prop-tbl th .th-ar { font-family:'Amiri',serif; font-size:8pt; color:rgba(255,255,255,0.65); direction:rtl; text-align:right; }
+.ct-prop-tbl td { border:1px solid #D4E8DB; background:#F7FBF8; padding:9px 10px; font-family:'EB Garamond',serif; font-size:9.5pt; color:#999; }
+.ct-prop-tbl td.f { color:var(--green-dark); font-weight:500; }
+
+.ct-sig-tbl { width:100%; border-collapse:collapse; margin-top:22px; }
+.ct-sig-tbl td { width:50%; vertical-align:top; border:2px solid var(--green); padding:20px 22px; background: var(--green-pale); }
+.ct-sig-party { font-family:'Inter',sans-serif; font-weight:800; font-size:8.5pt; letter-spacing:1.5px; text-transform:uppercase; color:var(--green); margin-bottom:16px; }
+.ct-sig-line { margin-top:10px; }
+.ct-sig-lbl { font-family:'Inter',sans-serif; font-weight:700; font-size:8pt; color:var(--green-mid); }
+.ct-sig-val { display:block; font-family:'EB Garamond',serif; font-size:9.5pt; color:var(--green-dark); border-bottom:1px solid #B5D9C3; min-height:22px; margin-top:3px; padding-bottom:2px; }
+.ct-sig-blank { color:#C8DDD0; }
+.ct-sig-line.tall .ct-sig-val { min-height:48px; }
+
+.ct-footnote { text-align:center; font-size:7.5pt; color:var(--muted); font-family:'EB Garamond',serif; margin-top:20px; padding-top:12px; border-top:1px solid #D4E8DB; }
+.ct-fn-brand { font-family:'Inter',sans-serif; font-size:7.5pt; letter-spacing:1px; color:var(--green-mid); margin-top:4px; }
+
+hr.ct-thin { border:none; border-top:1px solid #E4EFE8; margin:14px 0; }
+hr.ct-thick { border:none; border-top:2.5px solid var(--green); margin:16px 0; }
+.pg-brk { page-break-after:always; break-after:page; }
+
+/* ═══════════════════════════════════════════
+   PRINT
+═══════════════════════════════════════════ */
+@media print {
+  body { background: white; }
+  .header, .wizard, .preview-topbar { display: none !important; }
+  #preview-page { display: block !important; }
+  .cv-outer { margin: 0; padding: 0; max-width: none; }
+  .cv-wrap {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
+    border-radius: 0;
+  }
+  @page { size: A4; margin: 18mm; }
+  .pg-brk { page-break-after: always; }
+}
+
+/* ═══════════════════════════════════════════
+   TOAST NOTIFICATION
+═══════════════════════════════════════════ */
+.toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--red);
+  color: white;
+  padding: 12px 24px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  transition: transform 0.3s ease;
+  z-index: 999;
+  white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     HEADER
+══════════════════════════════════════ -->
+<div class="header">
+  <div class="header-brand">
+    <div class="name">OUJA RESIDENCE</div>
+    <div class="sub">Holiday Homes Management — Contract Form</div>
+  </div>
+  <div class="header-ar">عوجا سكن لإدارة الأملاك</div>
+</div>
+
+<!-- ══════════════════════════════════════
+     WIZARD
+══════════════════════════════════════ -->
+<div class="wizard" id="wizard">
+  <!-- Progress Bar -->
+  <div class="progress-bar" id="prog-bar">
+    <div class="pb-seg" id="ps0"></div>
+    <div class="pb-seg" id="ps1"></div>
+    <div class="pb-seg" id="ps2"></div>
+    <div class="pb-seg" id="ps3"></div>
+    <div class="pb-seg" id="ps4"></div>
+    <div class="pb-seg" id="ps5"></div>
+  </div>
+
+  <!-- ─── STEP 1: Contract Details ─── -->
+  <div class="step active" id="step-0">
+    <div class="step-header">
+      <div class="step-counter" id="sc-0">1/6</div>
+      <div class="step-title">Contract Details</div>
+      <div class="step-title-ar">تفاصيل العقد</div>
+    </div>
+    <div class="card">
+      <div class="field-row two-col">
+        <div class="field">
+          <label>Starting Date <span class="req">*</span></label>
+          <input type="date" id="f_start">
+        </div>
+        <div class="field">
+          <label>Management Fee % <span class="req">*</span> <span class="ar-lbl">نسبة الإدارة</span></label>
+          <input type="text" id="f_fee" placeholder="e.g. 20" maxlength="5">
+          <div class="hint">Enter number only — e.g. 20 for 20%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── STEP 2: Owner Personal ─── -->
+  <div class="step" id="step-1">
+    <div class="step-header">
+      <div class="step-counter">2/6</div>
+      <div class="step-title">Owner — Personal Info</div>
+      <div class="step-title-ar">بيانات المالك الشخصية</div>
+    </div>
+    <div class="card">
+      <div class="field-row one-col">
+        <div class="field">
+          <label>Owner Full Name <span class="req">*</span> <span class="ar-lbl">الاسم الكامل</span></label>
+          <input type="text" id="f_name" placeholder="Full name in English">
+        </div>
+      </div>
+      <div class="field-row two-col" style="margin-top:20px">
+        <div class="field">
+          <label>National ID / Passport No. <span class="req">*</span></label>
+          <input type="text" id="f_id" placeholder="ID or Passport number">
+        </div>
+        <div class="field">
+          <label>Phone Number <span class="req">*</span> <span class="ar-lbl">الجوال</span></label>
+          <input type="tel" id="f_phone" placeholder="+966 5X XXX XXXX">
+        </div>
+      </div>
+      <div class="field-row one-col" style="margin-top:20px">
+        <div class="field">
+          <label>Email Address <span class="req">*</span> <span class="ar-lbl">البريد الإلكتروني</span></label>
+          <input type="email" id="f_email" placeholder="owner@email.com">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── STEP 3: Owner Financial & Permit ─── -->
+  <div class="step" id="step-2">
+    <div class="step-header">
+      <div class="step-counter">3/6</div>
+      <div class="step-title">Owner — Financial &amp; Permit</div>
+      <div class="step-title-ar">البيانات المالية والتراخيص</div>
+    </div>
+    <div class="card">
+      <div class="field-row one-col">
+        <div class="field">
+          <label>IBAN / Bank Account No. <span class="req">*</span> <span class="ar-lbl">رقم الآيبان</span></label>
+          <input type="text" id="f_iban" placeholder="SA00 0000 0000 0000 0000 0000" maxlength="34">
+        </div>
+      </div>
+      <div class="field-row one-col" style="margin-top:20px">
+        <div class="field">
+          <label>USD Account No. — Saudi National Bank (SNB) <span class="req">*</span></label>
+          <input type="text" id="f_usd" placeholder="SNB USD account number">
+          <div class="hint">Required — Airbnb pays out in USD. Must be held at Saudi National Bank (SNB).</div>
+        </div>
+      </div>
+      <div class="field-row one-col" style="margin-top:20px">
+        <div class="field">
+          <label>Tourism Permit / Registration No. / Title Deed / Lease No. <span class="req">*</span></label>
+          <input type="text" id="f_permit" placeholder="Enter applicable permit, deed, or registration number">
+          <div class="hint">رقم التصريح السياحي · رقم التسجيل العيني · رقم الصك · رقم عقد الإيجار</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── STEP 4: Cleaning Fee ─── -->
+  <div class="step" id="step-3">
+    <div class="step-header">
+      <div class="step-counter">4/6</div>
+      <div class="step-title">Cleaning Fee</div>
+      <div class="step-title-ar">رسوم التنظيف الشهرية</div>
+    </div>
+    <div class="card">
+      <div class="field-row two-col">
+        <div class="field">
+          <label>Monthly Cleaning Fee (SAR) <span class="req">*</span></label>
+          <input type="number" id="f_clean" placeholder="1000" min="0" max="99999" value="1000">
+          <div class="hint">Default: 1,000 SAR</div>
+        </div>
+        <div class="field">
+          <label>Optional Note <span class="ar-lbl">ملاحظة</span></label>
+          <input type="text" id="f_clean_note" placeholder="e.g. includes deep clean after long stays">
+        </div>
+      </div>
+      <div class="fee-preview" id="fee-preview">
+        <div>
+          <div class="fp-label">Monthly Cleaning Fee · رسوم التنظيف الشهرية</div>
+          <div class="fp-sub">May vary ±30% based on cleaning company · قد تتفاوت ٣٠٪ زيادةً أو نقصاً</div>
+        </div>
+        <div class="fp-amount" id="fp-amount">SAR 1,000</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── STEP 5: Properties ─── -->
+  <div class="step" id="step-4">
+    <div class="step-header">
+      <div class="step-counter">5/6</div>
+      <div class="step-title">Properties</div>
+      <div class="step-title-ar">العقارات محل الاتفاقية</div>
+    </div>
+    <div class="card">
+      <div class="prop-tbl-wrap">
+        <table class="prop-entry-tbl">
+          <thead>
+            <tr>
+              <th style="width:11%">Unit<br><span style="font-family:'Tajawal',sans-serif;font-weight:400;color:#AAA">الوحدة</span></th>
+              <th style="width:28%">Full Address<br><span style="font-family:'Tajawal',sans-serif;font-weight:400;color:#AAA">العنوان</span></th>
+              <th style="width:15%">Type<br><span style="font-family:'Tajawal',sans-serif;font-weight:400;color:#AAA">النوع</span></th>
+              <th style="width:8%">Beds<br><span style="font-family:'Tajawal',sans-serif;font-weight:400;color:#AAA">غرف</span></th>
+              <th style="width:20%">Permit No.<br><span style="font-family:'Tajawal',sans-serif;font-weight:400;color:#AAA">رقم التصريح</span></th>
+              <th style="width:12%">Cleaning SAR<br><span style="font-family:'Tajawal',sans-serif;font-weight:400;color:#AAA">رسوم</span></th>
+              <th style="width:6%"></th>
+            </tr>
+          </thead>
+          <tbody id="prop-tbody"></tbody>
+        </table>
+      </div>
+      <button class="btn-add-row" onclick="addProp()">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Add Another Property
+      </button>
+    </div>
+  </div>
+
+  <!-- ─── STEP 6: Review ─── -->
+  <div class="step" id="step-5">
+    <div class="step-header">
+      <div class="step-counter">6/6</div>
+      <div class="step-title">Review &amp; Generate</div>
+      <div class="step-title-ar">مراجعة وإنشاء العقد</div>
+    </div>
+    <div class="card" id="review-card">
+      <!-- Populated by JS -->
+    </div>
+    <div style="background:var(--green-pale);border:1px solid #A7D8BB;border-radius:var(--radius-sm);padding:16px 20px;margin-top:12px;">
+      <p style="font-size:13px;color:var(--green-dark);line-height:1.6;">
+        <strong>Ready to generate.</strong> Click <em>Generate Contract</em> to produce the full bilingual agreement.
+        Then use <strong>Print / Save PDF</strong> in Chrome for the best output with proper Arabic fonts.
+        يُرجى مراجعة البيانات أعلاه قبل الإنشاء.
+      </p>
+    </div>
+  </div>
+
+  <!-- NAV -->
+  <div class="nav-bar">
+    <button class="btn-back" id="btn-back" onclick="goBack()" disabled>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 12L6 8l4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Back
+    </button>
+    <button class="btn-next" id="btn-next" onclick="goNext()">
+      Next
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+</div><!-- /wizard -->
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- ══════════════════════════════════════
+     PREVIEW PAGE (hidden until generated)
+══════════════════════════════════════ -->
+<div id="preview-page">
+  <div class="preview-topbar">
+    <div class="ptb-brand">
+      <div class="ptb-name">OUJA RESIDENCE</div>
+      <div class="ptb-sub">Holiday Homes Management — Contract Preview</div>
+    </div>
+    <div class="ptb-actions">
+      <button class="btn-back" style="padding:9px 18px;font-size:12.5px;" onclick="showWizard()">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 12L6 8l4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Edit Form
+      </button>
+      <button class="btn-generate" style="padding:9px 22px;font-size:12.5px;" onclick="window.print()">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 6V2h8v4M4 10H2v4h12v-4h-2M4 12h8M10 2v4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Print / Save PDF
+      </button>
+    </div>
+  </div>
+  <div class="cv-outer">
+    <div class="cv-wrap" id="cv-body"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════ -->
+<script>
+/* ── State ── */
+let cur = 0;
+const TOTAL = 6;
+let props = [{unit:'',address:'',type:'Apartment / شقة',beds:'',permit:'',clean:''}];
+
+/* ── Prop form ── */
+function renderProps(){
+  const tb = document.getElementById('prop-tbody');
+  tb.innerHTML = '';
+  props.forEach((p,i)=>{
+    tb.innerHTML += `<tr>
+      <td><input type="text" value="${xss(p.unit)}" oninput="props[${i}].unit=this.value" placeholder="Apt 12"></td>
+      <td><input type="text" value="${xss(p.address)}" oninput="props[${i}].address=this.value" placeholder="Street, District, City"></td>
+      <td><select onchange="props[${i}].type=this.value">
+        ${['Apartment / شقة','Villa / فيلا','Studio / استوديو','Townhouse / تاون هاوس','Chalet / شاليه'].map(t=>`<option${p.type===t?' selected':''}>${t}</option>`).join('')}
+      </select></td>
+      <td><input type="number" value="${xss(p.beds)}" oninput="props[${i}].beds=this.value" placeholder="2" min="0" max="30"></td>
+      <td><input type="text" value="${xss(p.permit)}" oninput="props[${i}].permit=this.value" placeholder="TP-XXXX"></td>
+      <td><input type="number" value="${xss(p.clean)}" oninput="props[${i}].clean=this.value" placeholder="1000" min="0"></td>
+      <td>${props.length>1?`<button class="btn-del-row" onclick="delProp(${i})">✕</button>`:''}</td>
+    </tr>`;
+  });
+}
+function addProp(){ props.push({unit:'',address:'',type:'Apartment / شقة',beds:'',permit:'',clean:''}); renderProps(); }
+function delProp(i){ if(props.length>1){ props.splice(i,1); renderProps(); } }
+renderProps();
+
+/* ── Fee preview live ── */
+document.getElementById('f_clean').addEventListener('input', function(){
+  const v = parseFloat(this.value)||0;
+  document.getElementById('fp-amount').textContent = 'SAR ' + v.toLocaleString('en-SA');
+});
+
+/* ── Progress bar ── */
+function updateProgress(){
+  for(let i=0;i<TOTAL;i++){
+    const el = document.getElementById('ps'+i);
+    if(i < cur)      el.className='pb-seg done';
+    else if(i===cur) el.className='pb-seg current';
+    else             el.className='pb-seg';
+  }
+}
+
+/* ── Validation per step ── */
+function validate(s){
+  const checks = {
+    0: [['f_start','Starting Date'],['f_fee','Management Fee %']],
+    1: [['f_name','Owner Full Name'],['f_id','National ID / Passport No.'],['f_phone','Phone Number'],['f_email','Email Address']],
+    2: [['f_iban','IBAN'],['f_usd','USD Account No.'],['f_permit','Permit / Deed No.']],
+    3: [['f_clean','Monthly Cleaning Fee']],
+    4: [],
+    5: [],
+  };
+  for(const [id,lbl] of (checks[s]||[])){
+    const el = document.getElementById(id);
+    if(!el.value.trim()){ showToast('Please fill: '+lbl); el.focus(); return false; }
+  }
+  if(s===4){
+    const bad = props.find(p=>!p.unit||!p.address||!p.beds);
+    if(bad){ showToast('Fill Unit, Address and Bedrooms for all properties.'); return false; }
+  }
+  return true;
+}
+
+/* ── Navigation ── */
+function goNext(){
+  if(!validate(cur)) return;
+  if(cur===4){
+    // last actual input step — on step 5 (review), show generate
+    buildReview();
+  }
+  if(cur < TOTAL-1){
+    document.getElementById('step-'+cur).classList.remove('active');
+    cur++;
+    document.getElementById('step-'+cur).classList.add('active');
+    updateProgress();
+    document.getElementById('btn-back').disabled = false;
+    if(cur===TOTAL-1){
+      document.getElementById('btn-next').innerHTML = `Generate Contract <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+      document.getElementById('btn-next').onclick = generateContract;
+    }
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+}
+function goBack(){
+  if(cur>0){
+    document.getElementById('step-'+cur).classList.remove('active');
+    cur--;
+    document.getElementById('step-'+cur).classList.add('active');
+    updateProgress();
+    document.getElementById('btn-back').disabled = cur===0;
+    document.getElementById('btn-next').innerHTML = `Next <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    document.getElementById('btn-next').onclick = goNext;
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+}
+function showWizard(){
+  document.getElementById('preview-page').classList.remove('visible');
+  document.getElementById('wizard').style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+/* ── Review summary ── */
+function buildReview(){
+  const f = getFormData();
+  let h = '';
+  h += `<div class="review-section">
+    <div class="rs-title">Contract Details</div>
+    <div class="review-grid">
+      <div class="rv-item"><div class="rv-key">Starting Date</div><div class="rv-val ${!f.start?'rv-empty':''}">${f.start ? fmtDate(f.start) : 'Not set'}</div></div>
+      <div class="rv-item"><div class="rv-key">Management Fee</div><div class="rv-val ${!f.fee?'rv-empty':''}">${f.fee ? f.fee+'%' : 'Not set'}</div></div>
+    </div>
+  </div>
+  <div class="review-section">
+    <div class="rs-title">Owner Information</div>
+    <div class="review-grid">
+      <div class="rv-item"><div class="rv-key">Full Name</div><div class="rv-val ${!f.name?'rv-empty':''}">${f.name||'Not set'}</div></div>
+      <div class="rv-item"><div class="rv-key">National ID</div><div class="rv-val ${!f.id?'rv-empty':''}">${f.id||'Not set'}</div></div>
+      <div class="rv-item"><div class="rv-key">Phone</div><div class="rv-val ${!f.phone?'rv-empty':''}">${f.phone||'Not set'}</div></div>
+      <div class="rv-item"><div class="rv-key">Email</div><div class="rv-val ${!f.email?'rv-empty':''}">${f.email||'Not set'}</div></div>
+    </div>
+  </div>
+  <div class="review-section">
+    <div class="rs-title">Financial & Permit</div>
+    <div class="review-grid">
+      <div class="rv-item"><div class="rv-key">IBAN</div><div class="rv-val ${!f.iban?'rv-empty':''}">${f.iban||'Not set'}</div></div>
+      <div class="rv-item"><div class="rv-key">USD Account (SNB)</div><div class="rv-val ${!f.usd?'rv-empty':''}">${f.usd||'Not set'}</div></div>
+      <div class="rv-item" style="grid-column:1/-1"><div class="rv-key">Permit / Deed No.</div><div class="rv-val ${!f.permit?'rv-empty':''}">${f.permit||'Not set'}</div></div>
+    </div>
+  </div>
+  <div class="review-section">
+    <div class="rs-title">Cleaning Fee</div>
+    <div class="review-grid">
+      <div class="rv-item"><div class="rv-key">Monthly Fee</div><div class="rv-val">SAR ${(parseFloat(f.clean)||0).toLocaleString('en-SA')}</div></div>
+      ${f.clean_note?`<div class="rv-item"><div class="rv-key">Note</div><div class="rv-val">${f.clean_note}</div></div>`:''}
+    </div>
+  </div>
+  <div class="review-section">
+    <div class="rs-title">Properties (${f.props.length})</div>
+    ${f.props.map((p,i)=>`<div style="background:#F9FAFB;border-radius:8px;padding:12px 14px;margin-top:8px;">
+      <div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:6px;">Property ${i+1}</div>
+      <div class="review-grid">
+        <div class="rv-item"><div class="rv-key">Unit</div><div class="rv-val">${p.unit||'—'}</div></div>
+        <div class="rv-item"><div class="rv-key">Beds</div><div class="rv-val">${p.beds||'—'}</div></div>
+        <div class="rv-item" style="grid-column:1/-1"><div class="rv-key">Address</div><div class="rv-val">${p.address||'—'}</div></div>
+        <div class="rv-item"><div class="rv-key">Type</div><div class="rv-val">${p.type}</div></div>
+        <div class="rv-item"><div class="rv-key">Permit</div><div class="rv-val">${p.permit||'—'}</div></div>
+      </div>
+    </div>`).join('')}
+  </div>`;
+  document.getElementById('review-card').innerHTML = h;
+}
+
+/* ── Helpers ── */
+function xss(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fv(v,ph){ return (v&&v.trim()) ? `<span class="fv-cv">${xss(v)}</span>` : `<span class="fv-cv-e">${ph}</span>`; }
+function alt(i){ return i%2===0?'ct-shade':'ct-white'; }
+function fmtDate(d){ if(!d) return null; return new Date(d+'T00:00:00').toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'}); }
+function fmtN(n){ return n ? Number(n).toLocaleString('en-SA') : '—'; }
+function getFormData(){
+  return {
+    start:      document.getElementById('f_start').value,
+    fee:        document.getElementById('f_fee').value.trim(),
+    name:       document.getElementById('f_name').value.trim(),
+    id:         document.getElementById('f_id').value.trim(),
+    phone:      document.getElementById('f_phone').value.trim(),
+    email:      document.getElementById('f_email').value.trim(),
+    iban:       document.getElementById('f_iban').value.trim(),
+    usd:        document.getElementById('f_usd').value.trim(),
+    permit:     document.getElementById('f_permit').value.trim(),
+    clean:      document.getElementById('f_clean').value.trim(),
+    clean_note: document.getElementById('f_clean_note').value.trim(),
+    props:      props,
+  };
+}
+
+/* ── Contract sections builders ── */
+function secH(en,ar){ return `<table class="ct-sec-hdr"><tr><td class="ct-sec-en">${xss(en)}</td><td class="ct-sec-ar" dir="rtl" lang="ar">${xss(ar)}</td></tr></table>`; }
+function artH(n,en,ar){ return `<table class="ct-art-hdr"><tr><td><span class="ct-art-num">${n}</span><span class="ct-art-en">${xss(en.toUpperCase())}</span></td><td class="ct-art-ar" dir="rtl" lang="ar"><span class="ct-art-ar">${xss(ar)}</span><span class="ct-art-num-ar"> ${n}</span></td></tr></table>`; }
+function biTbl(rows){ let h='<table class="ct-bi">'; rows.forEach((r,i)=>{ h+=`<tr><td class="ct-en ${alt(i)} ${r.b?'ct-bold':''}">${r.en}</td><td class="ct-ar ${alt(i)} ${r.b?'ct-bold':''}" dir="rtl" lang="ar">${r.ar}</td></tr>`; }); return h+'</table>'; }
+
+/* ── Contract data ── */
+const DEFS=[
+  {t:'Net Rental Revenue',ta:'صافي إيرادات الإيجار',d:'Total guest payments received through Booking Platforms, after deducting Airbnb service fees, processing fees, and VAT collected by Airbnb.',da:'إجمالي مدفوعات الضيوف عبر منصات الحجز، بعد خصم رسوم Airbnb ومعالجة المدفوعات وضريبة القيمة المضافة.'},
+  {t:'Booking Platform',ta:'منصة الحجز',d:'Any online short-term rental platform used to list the Property, including but not limited to Airbnb and Booking.com.',da:'أي منصة إيجار يومي إلكترونية، بما فيها Airbnb وBooking.com.'},
+  {t:'Operating Expenses',ta:'المصروفات التشغيلية',d:'Day-to-day costs including cleaning supplies, guest amenities, consumables, and minor repairs up to SAR 200 per incident.',da:'التكاليف اليومية شاملةً مستلزمات التنظيف والمواد الاستهلاكية والإصلاحات البسيطة حتى ٢٠٠ ريال.'},
+  {t:'Major Repair',ta:'الإصلاح الجوهري',d:'Any repair or replacement exceeding SAR 200 per incident, or any structural, mechanical, electrical, or plumbing work.',da:'أي إصلاح يتجاوز ٢٠٠ ريال، أو أعمال هيكلية أو ميكانيكية أو كهربائية أو صحية.'},
+  {t:'AirCover',ta:'AirCover',d:'Airbnb host protection programme covering certain guest-caused damages, subject to Airbnb terms.',da:'برنامج حماية المضيف من Airbnb، وفق شروطه القابلة للتغيير.'},
+  {t:'Confidential Information',ta:'المعلومات السرية',d:'All financial data, pricing strategies, guest data, operational processes, and any non-public information exchanged between the Parties.',da:'جميع البيانات المالية واستراتيجيات التسعير وبيانات الضيوف وأي معلومات غير مُتاحة للعامة.'},
+];
+const PRE=[
+  {en:'WHEREAS the Owner is the registered owner or authorised operator of the above Property and holds, or is obligated to hold, a valid Private Hospitality Facility Permit from the Saudi Ministry of Tourism;',ar:'حيث إن المالك هو المالك المسجل أو المشغل المفوّض للعقار المذكور أعلاه، ويحمل أو يلتزم بالحصول على تصريح ساري المفعول من وزارة السياحة السعودية؛'},
+  {en:'WHEREAS the Manager is a duly licensed property management company with demonstrated experience in short-term rental operations through digital platforms including Airbnb;',ar:'حيث إن المدير شركة إدارة عقارات مرخصة وذات خبرة في تشغيل الإيجار اليومي عبر المنصات الرقمية بما فيها Airbnb؛'},
+  {en:'NOW THEREFORE the Parties agree as set out below.',ar:'لذا يتفق الطرفان على ما يرد أدناه.'},
+];
+const ART=[
+  {n:'02',en:'Purpose of Agreement',ar:'الغرض من الاتفاقية',rows:[
+    {en:'2.1  The Owner appoints the Manager to exclusively manage, operate, and market the Property as a short-term rental through the Booking Platforms.',ar:'٢.١  يُفوّض المالك المدير بإدارة وتشغيل وتسويق العقار حصراً بنظام الإيجار اليومي عبر منصات الحجز.'},
+    {en:'2.2  This Agreement covers pricing, marketing, guest management, housekeeping, and full operational control.',ar:'٢.٢  تشمل هذه الاتفاقية التسعير والتسويق وإدارة الضيوف والتنظيف والسيطرة التشغيلية الكاملة.'},
+  ]},
+  {n:'03',en:'Exclusivity',ar:'الحصرية',rows:[
+    {en:'3.1  The Manager holds exclusive rights to operate and lease the Property during the term of this Agreement.',ar:'٣.١  يتمتع المدير بحق حصري لتشغيل العقار وتأجيره طوال مدة الاتفاقية.'},
+    {en:'3.2  The Owner shall not independently operate, lease, or rent the Property, or engage any third party to do so, without prior written consent from the Manager.',ar:'٣.٢  لا يحق للمالك تشغيل العقار أو تأجيره بصورة مستقلة أو إشراك طرف ثالث دون موافقة خطية مسبقة من المدير.'},
+    {en:'3.3  This exclusivity applies strictly to the units listed in the Property table above only.',ar:'٣.٣  تقتصر هذه الحصرية حصراً على الوحدات المبيّنة في جدول العقار أعلاه.'},
+  ]},
+  {n:'04',en:'Manager Responsibilities',ar:'التزامات المدير',rows:[
+    {en:'4.1  Dynamic daily pricing management and booking optimisation across all Booking Platforms.',ar:'٤.١  إدارة التسعير اليومي الديناميكي وتحسين الحجوزات عبر جميع منصات الحجز.'},
+    {en:'4.2  Professional guest communication and support throughout the stay, including pre-arrival and post-checkout follow-up.',ar:'٤.٢  التواصل الاحترافي مع الضيوف ودعمهم طوال الإقامة شاملاً ما قبل الوصول وبعد المغادرة.'},
+    {en:'4.3  Implementation and management of smart self-check-in systems.',ar:'٤.٣  تركيب وإدارة أنظمة الوصول الذكي التلقائي.'},
+    {en:'4.4  Digital marketing including social media, professional photography, and listing optimisation.',ar:'٤.٤  التسويق الرقمي عبر منصات التواصل الاجتماعي والتصوير الاحترافي وتحسين قوائم الحجز.'},
+    {en:'4.5  Regular cleaning after each checkout and scheduled deep cleaning.',ar:'٤.٥  التنظيف المنتظم بعد كل مغادرة وتنظيف شامل دوري.'},
+    {en:'4.6  Monthly revenue transfer to Owner IBAN with detailed performance report, by the 15th of the following month.',ar:'٤.٦  تحويل الإيرادات الشهرية لآيبان المالك مع تقرير أداء مفصّل في موعد أقصاه الخامس عشر من الشهر التالي.'},
+    {en:'4.7  Right of Property access for operations, preventive maintenance, inspection, and emergency response.',ar:'٤.٧  حق الدخول للعقار لأغراض التشغيل والصيانة الوقائية والتفتيش والطوارئ.'},
+    {en:'4.8  Prompt reporting to Owner of any Major Repair needs, with prior Owner approval required before proceeding.',ar:'٤.٨  الإبلاغ الفوري للمالك عن أي احتياجات لإصلاحات جوهرية مع اشتراط موافقة مسبقة قبل التنفيذ.'},
+    {en:'4.9  24/7 emergency guest line with response to urgent Property incidents within two (2) hours.',ar:'٤.٩  خط طوارئ للضيوف على مدار الساعة والاستجابة للحوادث الطارئة خلال ساعتين (٢).'},
+  ]},
+  {n:'05',en:'Owner Responsibilities',ar:'التزامات المالك',rows:[
+    {en:'5.1  Provide all required permits and documents, including a valid Tourism Permit prior to commencement of operations.',ar:'٥.١  تقديم جميع التصاريح والوثائق المطلوبة، بما فيها تصريح ساري المفعول قبل بدء التشغيل.'},
+    {en:'5.2  Bear all applicable government and licensing fees, including annual Tourism Permit renewal fees.',ar:'٥.٢  تحمّل جميع الرسوم الحكومية بما فيها رسوم التجديد السنوية.'},
+    {en:'5.3  Accept the Manager dynamic pricing strategy, which varies with market conditions, demand, and seasonality.',ar:'٥.٣  الموافقة على استراتيجية التسعير الديناميكي للمدير التي تتغير بحسب ظروف السوق والموسمية.'},
+    {en:'5.4  Deliver the Property furnished, clean, and fully operational prior to the Starting Date.',ar:'٥.٤  تسليم العقار مؤثثاً ونظيفاً وجاهزاً للتشغيل قبل تاريخ البدء.'},
+    {en:'5.5  Respond to Major Repair requests within five (5) business days and fund all Major Repairs promptly.',ar:'٥.٥  الرد على طلبات الإصلاح الجوهري خلال خمسة (٥) أيام عمل وتمويلها في الوقت المناسب.'},
+    {en:'5.6  Maintain valid property and third-party liability insurance for the full Agreement term.',ar:'٥.٦  الحفاظ على تأمين صالح للعقار والمسؤولية تجاه الأطراف الثالثة طوال مدة الاتفاقية.'},
+    {en:'5.7  Notify the Manager in writing at least 15 days before any planned personal use of the Property.',ar:'٥.٧  إشعار المدير خطياً قبل خمسة عشر (١٥) يوماً على الأقل من أي استخدام شخصي مرتقب.'},
+  ]},
+  {n:'06',en:'Fees & Revenue Calculation',ar:'الرسوم وآلية احتساب الإيرادات',rows:[
+    {en:'__FEE__',ar:'__FEE_AR__'},
+    {en:'6.2  Revenue Basis: Net Rental Revenue after deduction of Airbnb service fees, processing fees, and VAT collected by Airbnb.',ar:'٦.٢  أساس الاحتساب: صافي إيرادات الإيجار بعد خصم رسوم Airbnb ومعالجة المدفوعات وضريبة القيمة المضافة.'},
+    {en:'6.3  VAT on Management Fee: Subject to VAT at the prevailing Saudi rate, borne by the Owner.',ar:'٦.٣  ضريبة القيمة المضافة: تخضع رسوم المدير للضريبة وفق النسبة المعمول بها، ويتحملها المالك.'},
+    {en:'6.4  AirCover compensation is excluded from Net Rental Revenue and does not affect fee calculations.',ar:'٦.٤  تعويضات AirCover مستثناة من صافي الإيرادات ولا تؤثر على احتساب الرسوم.'},
+    {en:'6.5  Monthly statement showing gross bookings, platform deductions, Operating Expenses, and net transferred amount.',ar:'٦.٥  كشف شهري يبيّن إجمالي الحجوزات وخصومات المنصة والمصروفات التشغيلية وصافي المبالغ المحوّلة.'},
+  ]},
+  {n:'07',en:'Payment Terms',ar:'شروط الدفع',rows:[
+    {en:'__PAY__',ar:'__PAY_AR__'},
+    {en:'7.2  The Manager may retain up to SAR 500/month as a maintenance float; unused amounts roll into the next transfer.',ar:'٧.٢  يجوز للمدير احتجاز ما يصل إلى ٥٠٠ ريال شهرياً كاحتياطي صيانة؛ تُدرج المبالغ غير المستخدمة في التحويل التالي.'},
+    {en:'7.3  USD Account Requirement: Since Airbnb processes all payouts in US Dollars (USD), the Owner is required to maintain an active USD-denominated bank account with Saudi National Bank (SNB). The Owner bears full responsibility for any currency conversion costs, exchange rate differences, or account-related fees. The Manager shall not be liable for any loss arising from the Owner failure to maintain such an account.',ar:'٧.٣  اشتراط الحساب بالدولار: نظراً لأن Airbnb تعالج المدفوعات بالدولار، يلتزم المالك بامتلاك حساب دولاري لدى البنك الأهلي السعودي (SNB). يتحمل المالك كامل مسؤولية تكاليف تحويل العملة وفروق الصرف والرسوم المصرفية.'},
+    {en:'7.4  Owner must notify Manager of bank account changes at least 10 business days before the next transfer.',ar:'٧.٤  يُشعر المالك المدير بأي تغيير في بيانات الحساب البنكي قبل عشرة (١٠) أيام عمل من التحويل التالي.'},
+  ]},
+  {n:'08',en:'Cleaning Fee',ar:'رسوم التنظيف',rows:[{en:'__CLEAN__',ar:'__CLEAN_AR__'}]},
+  {n:'09',en:'Additional Services',ar:'الخدمات الإضافية',rows:[
+    {en:'9.1  Extra services for guests (transfers, groceries, event packages, etc.) constitute exclusive Manager income and are not shared with the Owner.',ar:'٩.١  الخدمات الإضافية للضيوف دخل حصري للمدير ولا تُشارَك فيها المالك.'},
+    {en:'9.2  The Manager shall disclose additional services transparently and ensure they do not compromise Property quality or safety.',ar:'٩.٢  يُفصح المدير عن هذه الخدمات بشفافية ويضمن ألا تؤثر على جودة العقار أو سلامته.'},
+  ]},
+  {n:'10',en:'Maintenance & Repairs',ar:'الصيانة والإصلاحات',rows:[
+    {en:'10.1  The Manager handles all routine Operating Expenses from the maintenance float and reports usage monthly.',ar:'١٠.١  يتولى المدير تغطية المصروفات التشغيلية الاعتيادية من احتياطي الصيانة ويُبلّغ عنها شهرياً.'},
+    {en:'10.2  For any Major Repair: (a) notify Owner with written estimate; (b) await Owner approval, unless urgency requires immediate action.',ar:'١٠.٢  بشأن أي إصلاح جوهري: (أ) إشعار المالك بتقدير خطي؛ (ب) انتظار موافقته، إلا في حالات الطوارئ.'},
+    {en:'10.3  All Major Repairs are funded by the Owner. Manager may advance costs in emergencies with Owner written consent.',ar:'١٠.٣  يُموّل المالك جميع الإصلاحات الجوهرية. يجوز للمدير تسبيق التكلفة في الطوارئ بموافقة خطية من المالك.'},
+    {en:'10.4  The Manager conducts a full property inspection at least once every three (3) months.',ar:'١٠.٤  يُجري المدير فحصاً شاملاً للعقار مرة على الأقل كل ثلاثة (٣) أشهر.'},
+  ]},
+  {n:'11',en:'Insurance & AirCover',ar:'التأمين وبرنامج AirCover',rows:[
+    {en:'11.1  Guest damages are handled first through Airbnb AirCover, subject to Airbnb terms.',ar:'١١.١  تُعالَج أضرار الضيوف أولاً من خلال برنامج AirCover من Airbnb وفق شروطه.'},
+    {en:'11.2  AirCover is a third-party programme; coverage is not guaranteed.',ar:'١١.٢  AirCover برنامج تابع لطرف ثالث؛ تغطيته غير مضمونة.'},
+    {en:'11.3  Owner-supplied furniture and equipment remain the Owner responsibility. The Owner is entitled to 100% of any AirCover compensation for such items.',ar:'١١.٣  الأثاث المملوك للمالك تحت مسؤوليته. يستحق المالك ١٠٠٪ من أي تعويض من AirCover عنه.'},
+    {en:'11.4  Owner shall maintain comprehensive property and liability insurance for the full Agreement term.',ar:'١١.٤  يحتفظ المالك بتأمين شامل للممتلكات والمسؤولية طوال مدة الاتفاقية.'},
+  ]},
+  {n:'12',en:'No Income Guarantee',ar:'عدم ضمان الدخل',rows:[
+    {en:'12.1  The Manager does not guarantee any specific occupancy rate or revenue level.',ar:'١٢.١  لا يضمن المدير أي نسبة إشغال أو مستوى دخل محدد.'},
+    {en:'12.2  The Manager shall at all times apply reasonable commercial efforts to maximise Owner revenue.',ar:'١٢.٢  يبذل المدير جهوداً تجارية معقولة لتعظيم إيرادات المالك.'},
+  ]},
+  {n:'13',en:'Suspension of Operations',ar:'تعليق التشغيل',rows:[
+    {en:'13.1  The Manager may suspend new bookings if: (a) permits are not met; (b) the Property poses a risk; or (c) required by a competent authority.',ar:'١٣.١  يجوز للمدير تعليق الحجوزات إذا لم تُستوفَ التصاريح أو شكّل العقار خطراً أو طُلب ذلك من جهة مختصة.'},
+    {en:'13.2  The Manager bears no liability for revenue loss during a legitimate suspension.',ar:'١٣.٢  لا يتحمل المدير أي مسؤولية عن خسارة الإيرادات خلال التعليق المشروع.'},
+  ]},
+  {n:'14',en:'Owner Use of Property',ar:'استخدام المالك للعقار',rows:[
+    {en:'14.1  Owner may use the Property during booking-free periods only, with at least 15 days prior written notice via Hostaway.',ar:'١٤.١  يجوز للمالك استخدام العقار في الفترات الخالية من الحجوزات مع إشعار مسبق عبر Hostaway قبل ١٥ يوماً.'},
+    {en:'14.2  Owner bears the cost of any cleaning required after personal use.',ar:'١٤.٢  يتحمل المالك تكاليف التنظيف اللازم بعد أي استخدام شخصي.'},
+  ]},
+  {n:'15',en:'Handover & Condition',ar:'التسليم والاستلام',rows:[
+    {en:'15.1  At commencement, both Parties conduct a joint inventory and sign a Property Condition Report.',ar:'١٥.١  عند البدء، يُجري الطرفان فحص جرد مشترك ويوقّعان تقرير حالة العقار.'},
+    {en:'15.2  Upon termination, the Property is returned in the condition documented at commencement, allowing for normal wear and tear.',ar:'١٥.٢  عند الانتهاء، يُسلَّم العقار بالحالة المُوثَّقة في بداية الاتفاقية مع مراعاة الاستهلاك الطبيعي.'},
+  ]},
+  {n:'16',en:'Confidentiality',ar:'السرية',rows:[
+    {en:'16.1  Each Party shall keep all Confidential Information strictly confidential for the term of this Agreement and two (2) years after termination.',ar:'١٦.١  يلتزم كل طرف بالحفاظ على سرية المعلومات لمدة سنتين بعد انتهاء الاتفاقية.'},
+    {en:'16.2  Guest personal data is processed in accordance with applicable Saudi data protection laws.',ar:'١٦.٢  تُعالَج البيانات الشخصية للضيوف وفق أنظمة حماية البيانات السعودية المعمول بها.'},
+  ]},
+  {n:'17',en:'Non-Solicitation',ar:'عدم الاستقطاب',rows:[
+    {en:'17.1  During the Agreement term and for twelve (12) months after termination, the Owner shall not solicit, hire, or engage any Manager employee involved in managing the Property.',ar:'١٧.١  خلال مدة الاتفاقية ولاثني عشر (١٢) شهراً بعد انتهائها، لا يجوز للمالك استقطاب أو توظيف أي موظف تابع للمدير.'},
+  ]},
+  {n:'18',en:'Governing Law & Dispute Resolution',ar:'القانون الواجب التطبيق وتسوية النزاعات',rows:[
+    {en:'18.1  This Agreement is governed by the laws of the Kingdom of Saudi Arabia, including the Civil Transactions Law.',ar:'١٨.١  تخضع هذه الاتفاقية لأنظمة المملكة العربية السعودية بما فيها نظام المعاملات المدنية.'},
+    {en:'18.2  Parties shall first endeavour to resolve disputes amicably within thirty (30) days of written notice.',ar:'١٨.٢  يسعى الطرفان لتسوية النزاعات وديّاً خلال ثلاثين (٣٠) يوماً من إشعار خطي.'},
+    {en:'18.3  Unresolved disputes shall be referred to the competent Saudi Commercial Court in Riyadh or, by mutual agreement, to SCCA arbitration.',ar:'١٨.٣  تُحال النزاعات غير المُسوّاة للمحكمة التجارية في الرياض أو، باتفاق مشترك، للتحكيم عبر SCCA.'},
+  ]},
+  {n:'19',en:'Term & Termination',ar:'مدة الاتفاقية وإنهاؤها',rows:[
+    {en:'19.1  Term: One (1) Gregorian year from the Starting Date; auto-renews unless either Party gives sixty (60) days written notice before expiry.',ar:'١٩.١  المدة: سنة ميلادية واحدة من تاريخ البدء؛ تتجدد تلقائياً ما لم يُشعر أحد الطرفين قبل ستين (٦٠) يوماً من انتهاء المدة.'},
+    {en:'19.2  Termination for Convenience: Either Party may terminate by giving at least three (3) months written notice.',ar:'١٩.٢  الإنهاء الاختياري: يحق لأي طرف الإنهاء بإشعار خطي مدته ثلاثة (٣) أشهر على الأقل.'},
+    {en:'19.3  Termination for Cause: Either Party may terminate immediately if the other commits material breach, becomes insolvent, or engages in fraud or gross negligence.',ar:'١٩.٣  الإنهاء لسبب مشروع: يجوز الإنهاء الفوري في حال مخالفة جوهرية أو الإعسار أو الغش أو الإهمال الجسيم.'},
+    {en:'19.4  Immediate Termination (Zero Bookings): Owner may terminate immediately without compensation if the Property calendar is entirely free of confirmed future bookings.',ar:'١٩.٤  الإنهاء الفوري: يحق للمالك الإنهاء الفوري دون تعويض إذا كان سجل الحجوزات خالياً تماماً من حجوزات مؤكدة.'},
+    {en:'19.5  Final Settlement: Within 15 days from termination, the Manager shall hand over the Property, deliver a final reconciliation statement, and return all keys and access devices.',ar:'١٩.٥  التسوية الختامية: خلال ١٥ يوماً من الإنهاء، يلتزم المدير بتسليم العقار وكشف التسوية الختامي وجميع المفاتيح وأجهزة الوصول.'},
+  ]},
+  {n:'20',en:'General Provisions',ar:'أحكام عامة',rows:[
+    {en:'20.1  Entire Agreement: This Agreement supersedes all prior negotiations and agreements relating to its subject matter.',ar:'٢٠.١  الاتفاقية الكاملة: تحلّ هذه الاتفاقية محل جميع المفاوضات والاتفاقيات السابقة.'},
+    {en:'20.2  Amendments must be in writing and signed by authorised representatives of both Parties.',ar:'٢٠.٢  يجب أن يكون أي تعديل خطياً وموقّعاً من ممثلين مفوّضين.'},
+    {en:'20.3  Severability: Invalidity of any provision shall not affect the remainder of this Agreement.',ar:'٢٠.٣  قابلية الفصل: لا يؤثر بطلان أي بند على سائر أحكام الاتفاقية.'},
+    {en:'20.4  Language: Arabic text prevails in the event of any conflict between the Arabic and English versions.',ar:'٢٠.٤  اللغة: يُقدَّم النص العربي في حالة أي تعارض بين النسختين.'},
+  ]},
+];
+
+/* ── Contract builder ── */
+function generateContract(){
+  const f = getFormData();
+  let h = '';
+
+  // Cover
+  h += `<div class="cv-logo-block">
+    <div class="cv-logo-left">
+      <div class="cv-company">OUJA  RESIDENCE</div>
+      <div class="cv-company-sub">VACATION HOMES  ·  PROPERTY MANAGEMENT</div>
+    </div>
+    <div>
+      <div class="cv-logo-ar" dir="rtl" lang="ar">عوجا سكن</div>
+      <div class="cv-logo-ar-sub" dir="rtl" lang="ar">إدارة الأملاك · الإيجار اليومي</div>
+    </div>
+  </div>
+  <div class="cv-title-box">
+    <div class="cv-title-en">HOLIDAY  HOMES  MANAGEMENT  AGREEMENT</div>
+    <div class="cv-dash">—</div>
+    <div class="cv-title-ar" dir="rtl" lang="ar">اتفاقية إدارة وتشغيل وحدة عقارية بنظام الإيجار اليومي</div>
+  </div>`;
+
+  const dv = fmtDate(f.start);
+  h += `<div class="cv-meta">
+    <div class="cv-meta-cell">
+      <div class="cv-meta-lbl">Starting Date / تاريخ البدء</div>
+      <div class="cv-meta-val ${!dv?'empty':''}">${dv||'Not specified'}</div>
+    </div>
+    <div class="cv-meta-cell">
+      <div class="cv-meta-lbl">Management Fee / نسبة الإدارة</div>
+      <div class="cv-meta-val ${!f.fee?'empty':''}">${f.fee?f.fee+' %':'Not specified'}</div>
+    </div>
+  </div>`;
+
+  h += '<hr class="ct-thin">';
+
+  // Parties
+  h += secH('The Owner  —  First Party','المالك  —  الطرف الأول');
+  const oRws=[
+    {lbl:'Full Name',lbla:'الاسم الكامل',val:f.name},
+    {lbl:'National ID / Passport No.',lbla:'رقم الهوية / جواز السفر',val:f.id},
+    {lbl:'Phone Number',lbla:'رقم الجوال',val:f.phone},
+    {lbl:'Email Address',lbla:'البريد الإلكتروني',val:f.email},
+    {lbl:'IBAN / Bank Account No.',lbla:'رقم الآيبان',val:f.iban},
+    {lbl:'Tourism Permit / Registration / Title Deed / Lease No.',lbla:'رقم التصريح / التسجيل العيني / الصك / عقد الإيجار',val:f.permit},
+    {lbl:'USD Bank Account No. — Saudi National Bank (SNB)',lbla:'الحساب الدولاري — البنك الأهلي السعودي (SNB)',val:f.usd},
+  ];
+  h += '<table class="ct-bi">';
+  oRws.forEach((r,i)=>{
+    h+=`<tr>
+      <td class="ct-en ${alt(i)} ct-bold"><strong>${xss(r.lbl)}</strong><br><span style="font-weight:400;font-size:8.5pt;color:#555">${fv(r.val,'________________________')}</span></td>
+      <td class="ct-ar ${alt(i)} ct-bold" dir="rtl" lang="ar"><strong>${xss(r.lbla)}</strong><br><span style="font-weight:400;font-size:9pt;color:#555">${fv(r.val,'________________________')}</span></td>
+    </tr>`;
+  });
+  h += '</table>';
+
+  h += secH('The Manager  —  Second Party','المدير  —  الطرف الثاني');
+  h += biTbl([
+    {en:'Ouja Residence Property Management Co.',ar:'شركة عوجا سكن لإدارة الأملاك',b:true},
+    {en:'Unified National No.  7050158810',ar:'السجل الوطني الموحد  7050158810'},
+    {en:'Representative  —  Faisal Bin Nassar, CEO',ar:'الممثل القانوني  —  فيصل بن نصار، الرئيس التنفيذي'},
+    {en:'Phone  +966 53 377 9297  ·  info@oujares.com',ar:'هاتف  +966 53 377 9297  ·  info@oujares.com'},
+    {en:"Address  Riyadh, Al-Ma'athar Al-Shamali",ar:'العنوان  الرياض، حي المعذر الشمالي'},
+  ]);
+
+  // Properties
+  h += secH('Properties Subject to This Agreement','العقارات محل الاتفاقية');
+  h += `<table class="ct-prop-tbl"><thead><tr>
+    <th style="width:10%"><div class="th-en">Unit</div><div class="th-ar" dir="rtl">الوحدة</div></th>
+    <th style="width:28%"><div class="th-en">Full Address</div><div class="th-ar" dir="rtl">العنوان</div></th>
+    <th style="width:14%"><div class="th-en">Type</div><div class="th-ar" dir="rtl">النوع</div></th>
+    <th style="width:8%"><div class="th-en">Beds</div><div class="th-ar" dir="rtl">غرف</div></th>
+    <th style="width:22%"><div class="th-en">Permit No.</div><div class="th-ar" dir="rtl">رقم التصريح</div></th>
+    <th style="width:18%"><div class="th-en">Monthly Cleaning</div><div class="th-ar" dir="rtl">رسوم التنظيف</div></th>
+  </tr></thead><tbody>`;
+  f.props.forEach(p=>{
+    const cf = (p.clean&&p.clean.trim()) ? fmtN(p.clean) : fmtN(f.clean||'1000');
+    h+=`<tr>
+      <td class="${p.unit?'f':''}">${fv(p.unit,'_____')}</td>
+      <td class="${p.address?'f':''}">${fv(p.address,'________________________')}</td>
+      <td class="f">${xss(p.type)}</td>
+      <td class="${p.beds?'f':''}">${fv(p.beds,'_')}</td>
+      <td class="${p.permit?'f':''}">${fv(p.permit,'_____')}</td>
+      <td class="f"><span class="fv-cv">${cf} SAR / month</span></td>
+    </tr>`;
+  });
+  h += '</tbody></table><hr class="ct-thin"><div class="pg-brk"></div>';
+
+  // Preamble
+  h += artH('—','Preamble','ديباجة الاتفاقية');
+  h += '<table class="ct-bi">';
+  PRE.forEach((r,i)=>{ h+=`<tr><td class="ct-en ${alt(i)}" style="font-style:italic">${xss(r.en)}</td><td class="ct-ar ${alt(i)}" style="font-style:italic" dir="rtl" lang="ar">${xss(r.ar)}</td></tr>`; });
+  h += '</table>';
+
+  // Definitions
+  h += artH('01','Definitions','التعريفات');
+  h += '<table class="ct-bi">';
+  DEFS.forEach((d,i)=>{
+    h+=`<tr><td class="ct-en ct-shade ct-bold">${xss(d.t)}</td><td class="ct-ar ct-shade ct-bold" dir="rtl" lang="ar">${xss(d.ta)}</td></tr>`;
+    h+=`<tr><td class="ct-en ct-white">${xss(d.d)}</td><td class="ct-ar ct-white" dir="rtl" lang="ar">${xss(d.da)}</td></tr>`;
+  });
+  h += '</table>';
+
+  // Articles
+  ART.forEach(a=>{
+    h += artH(a.n,a.en,a.ar);
+    h += '<table class="ct-bi">';
+    a.rows.forEach((r,i)=>{
+      let en=r.en,ar=r.ar;
+      if(en==='__FEE__'){
+        en=`6.1  Management Fee: The Manager is entitled to ${fv(f.fee,'_______ %')} of Net Rental Revenue per booking.`;
+        ar=`٦.١  يستحق المدير نسبة ${fv(f.fee,'_______ %')} من صافي إيرادات الإيجار عن كل حجز.`;
+      }
+      if(en==='__PAY__'){
+        en=`7.1  Owner share transferred to SNB USD account No. ${fv(f.usd,'__SNB-USD__')} by the 15th of the month following the booking month.`;
+        ar=`٧.١  يُحوَّل نصيب المالك إلى حسابه الدولاري لدى البنك الأهلي (SNB) — رقم الحساب ${fv(f.usd,'__SNB-USD__')} — في موعد أقصاه الخامس عشر من الشهر التالي.`;
+      }
+      if(en==='__CLEAN__'){
+        const ca = fmtN(f.clean||'1000');
+        const nt = f.clean_note ? ` Note: ${xss(f.clean_note)}.` : '';
+        en=`8.1  Monthly Cleaning Fee: The Owner shall pay a monthly cleaning fee of ${fv(f.clean,ca+' SAR')} SAR. This fee may vary by up to 30% (more or less) due to changes in cleaning companies or scope of services.${nt}`;
+        ar=`٨.١  رسوم التنظيف الشهرية: يلتزم المالك بدفع رسوم تنظيف شهرية بقيمة ${fv(f.clean,ca+' ريال')} ريال سعودي. قد تتفاوت هذه الرسوم بنسبة تصل إلى ٣٠٪ زيادةً أو نقصاً بحسب شركة التنظيف المُستعان بها وطبيعة الخدمات.`;
+      }
+      h+=`<tr><td class="ct-en ${alt(i)}">${en}</td><td class="ct-ar ${alt(i)}" dir="rtl" lang="ar">${ar}</td></tr>`;
+    });
+    h += '</table>';
+  });
+
+  // Signatures
+  h += '<div class="pg-brk"></div><hr class="ct-thick" style="margin-top:20px">';
+  h += `<p style="font-family:'EB Garamond',serif;font-size:9pt;color:var(--muted);margin:10px 0 3px;">
+    <strong style="font-family:'Inter',sans-serif;font-size:9pt;letter-spacing:1px;color:var(--green);">IN WITNESS WHEREOF</strong>
+    &nbsp;—&nbsp;the Parties have executed this Agreement as of the date first written above.
+  </p>
+  <p style="font-family:'Amiri',serif;font-size:10pt;color:var(--green-mid);direction:rtl;text-align:right;margin-bottom:18px;">وقّع الطرفان هذه الاتفاقية إشهاداً على ما تقدّم.</p>`;
+
+  h += `<table class="ct-sig-tbl"><tr>
+    <td>
+      <div class="ct-sig-party">The Owner  /  المالك</div>
+      <div class="ct-sig-line"><span class="ct-sig-lbl">Full Name:</span><span class="ct-sig-val ${!f.name?'ct-sig-blank':''}">${f.name?xss(f.name):'&nbsp;'}</span></div>
+      <div class="ct-sig-line"><span class="ct-sig-lbl">National ID:</span><span class="ct-sig-val ${!f.id?'ct-sig-blank':''}">${f.id?xss(f.id):'&nbsp;'}</span></div>
+      <div class="ct-sig-line tall"><span class="ct-sig-lbl">Signature:</span><span class="ct-sig-val ct-sig-blank" style="min-height:48px">&nbsp;</span></div>
+      <div class="ct-sig-line"><span class="ct-sig-lbl">Date:</span><span class="ct-sig-val ct-sig-blank">&nbsp;</span></div>
+    </td>
+    <td>
+      <div class="ct-sig-party">The Manager  /  المدير</div>
+      <div class="ct-sig-line"><span class="ct-sig-lbl">Company:</span><span class="ct-sig-val">Ouja Residence Property Management Co.</span></div>
+      <div class="ct-sig-line"><span class="ct-sig-lbl">Representative:</span><span class="ct-sig-val">Faisal Bin Nassar — CEO / فيصل بن نصار</span></div>
+      <div class="ct-sig-line tall"><span class="ct-sig-lbl">Signature:</span><span class="ct-sig-val ct-sig-blank" style="min-height:48px">&nbsp;</span></div>
+      <div class="ct-sig-line"><span class="ct-sig-lbl">Date:</span><span class="ct-sig-val ct-sig-blank">&nbsp;</span></div>
+    </td>
+  </tr></table>`;
+
+  h += `<div class="ct-footnote">
+    This Agreement is subject to the laws of the Kingdom of Saudi Arabia  ·  تخضع هذه الاتفاقية لأنظمة المملكة العربية السعودية
+    <div class="ct-fn-brand">OUJA RESIDENCE PROPERTY MANAGEMENT CO.  ·  info@oujares.com  ·  +966 53 377 9297</div>
+  </div>`;
+
+  document.getElementById('cv-body').innerHTML = h;
+  document.getElementById('preview-page').classList.add('visible');
+  document.getElementById('wizard').style.display = 'none';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ── Init progress ── */
+updateProgress();
+</script>
+</body>
+</html>

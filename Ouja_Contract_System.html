@@ -1,0 +1,2076 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نظام عقود عوجا سكن — Contract Builder</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/docx@8.5.0/build/index.umd.min.js"></script>
+<script src="https://unpkg.com/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+<style>
+  :root {
+    --primary: #0B5345;
+    --primary-light: #1E8449;
+    --accent: #16A085;
+    --bg: #F8FAF9;
+    --surface: #FFFFFF;
+    --border: #D5DEDA;
+    --text: #1A2421;
+    --muted: #6B7773;
+    --light-bg: #EAF4EC;
+    --danger: #C0392B;
+    --warning: #F39C12;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Tajawal', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    font-size: 15px;
+  }
+  /* Header */
+  header.app-header {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: #fff;
+    padding: 16px 24px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .app-header-inner {
+    display: flex; justify-content: space-between; align-items: center;
+    max-width: 1600px; margin: 0 auto;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand-name { font-size: 22px; font-weight: 700; letter-spacing: 0.5px; }
+  .brand-sub { font-size: 13px; opacity: 0.85; font-weight: 400; }
+  .header-actions { display: flex; gap: 8px; }
+  .btn {
+    padding: 10px 18px; border: none; border-radius: 8px; cursor: pointer;
+    font-family: inherit; font-size: 14px; font-weight: 500;
+    transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-primary { background: #fff; color: var(--primary); }
+  .btn-primary:hover { background: #f0f0f0; transform: translateY(-1px); }
+  .btn-ghost { background: rgba(255,255,255,0.15); color: #fff; }
+  .btn-ghost:hover { background: rgba(255,255,255,0.25); }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-secondary { background: #fff; color: var(--primary); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: var(--light-bg); }
+
+  /* Layout */
+  .container { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding: 24px; max-width: 1600px; margin: 0 auto; }
+  @media (max-width: 1100px) { .container { grid-template-columns: 1fr; } }
+
+  /* Form panel */
+  .form-panel { background: var(--surface); border-radius: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); overflow: hidden; }
+  .section {
+    border-bottom: 1px solid var(--border);
+  }
+  .section-header {
+    background: var(--light-bg);
+    padding: 14px 20px;
+    cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center;
+    font-weight: 700; color: var(--primary);
+    user-select: none;
+    transition: background 0.2s;
+  }
+  .section-header:hover { background: #DDEAE0; }
+  .section-header .arrow { transition: transform 0.2s; font-size: 12px; }
+  .section.collapsed .section-header .arrow { transform: rotate(-90deg); }
+  .section-body { padding: 20px; }
+  .section.collapsed .section-body { display: none; }
+
+  /* Form elements */
+  .field { margin-bottom: 14px; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .field-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  label { display: block; font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 5px; }
+  label .req { color: var(--danger); margin-right: 3px; }
+  input[type="text"], input[type="number"], input[type="email"], input[type="tel"], input[type="date"], select, textarea {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 7px;
+    font-family: inherit; font-size: 14px; background: #fff; color: var(--text);
+    transition: border 0.2s, box-shadow 0.2s;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none; border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(11,83,69,0.1);
+  }
+  textarea { min-height: 80px; resize: vertical; }
+
+  /* Radio/toggle group */
+  .radio-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .radio-option {
+    flex: 1; min-width: 100px;
+    padding: 12px 14px; border: 2px solid var(--border); border-radius: 8px;
+    cursor: pointer; text-align: center; font-weight: 500; font-size: 14px;
+    transition: all 0.2s; background: #fff;
+  }
+  .radio-option:hover { border-color: var(--accent); }
+  .radio-option.selected { border-color: var(--primary); background: var(--light-bg); color: var(--primary); font-weight: 700; }
+  .radio-option input { display: none; }
+
+  /* Repeater items (parties, properties) */
+  .repeater-item {
+    background: #FAFBFB; border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px; margin-bottom: 14px; position: relative;
+  }
+  .repeater-item-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px dashed var(--border);
+  }
+  .repeater-item-title { font-weight: 700; color: var(--primary); font-size: 15px; }
+  .icon-btn {
+    background: none; border: none; cursor: pointer; padding: 6px 10px;
+    border-radius: 6px; color: var(--danger); font-size: 13px; font-weight: 500;
+    transition: background 0.2s;
+  }
+  .icon-btn:hover { background: rgba(192,57,43,0.1); }
+  .add-btn {
+    width: 100%; padding: 12px; border: 2px dashed var(--accent);
+    background: transparent; color: var(--accent); border-radius: 8px;
+    cursor: pointer; font-family: inherit; font-weight: 500; font-size: 14px;
+    transition: all 0.2s;
+  }
+  .add-btn:hover { background: var(--light-bg); border-color: var(--primary); }
+
+  /* Preview panel */
+  .preview-panel {
+    background: var(--surface); border-radius: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    overflow: hidden; position: sticky; top: 90px; max-height: calc(100vh - 110px); display: flex; flex-direction: column;
+  }
+  .preview-header {
+    background: var(--primary); color: #fff; padding: 12px 20px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .preview-header h3 { font-size: 15px; font-weight: 600; }
+  .preview-body {
+    flex: 1; overflow-y: auto; padding: 30px 36px; background: #fafafa;
+    font-family: 'Amiri', 'Sakkal Majalla', 'Traditional Arabic', serif;
+    font-size: 13px; line-height: 1.8;
+  }
+  .preview-body h1 { font-size: 22px; color: var(--primary); text-align: center; margin: 16px 0 8px; font-weight: 700; }
+  .preview-body h2 { font-size: 17px; color: var(--primary); margin: 22px 0 10px; padding-bottom: 5px; border-bottom: 2px solid var(--primary); font-weight: 700; }
+  .preview-body h3 { font-size: 15px; color: var(--primary-light); margin: 14px 0 6px; font-weight: 600; }
+  .preview-body p { margin-bottom: 8px; text-align: justify; }
+  .preview-body .clause-num { font-weight: 700; color: var(--primary); margin-left: 4px; }
+  .preview-body .bullet { padding-right: 20px; position: relative; margin-bottom: 4px; }
+  .preview-body .bullet::before { content: "•"; color: var(--primary-light); position: absolute; right: 0; font-weight: 700; }
+  .preview-body table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+  .preview-body th { background: var(--primary); color: #fff; padding: 8px; font-weight: 600; }
+  .preview-body td { border: 1px solid var(--border); padding: 8px; }
+  .preview-body td.label { background: var(--light-bg); font-weight: 600; color: var(--primary); width: 40%; }
+  .preview-body .definition { margin-bottom: 8px; }
+  .preview-body .definition b { color: var(--primary); }
+  .preview-body .cover-title { font-size: 28px; text-align: center; color: var(--text); font-weight: 700; margin: 30px 0 10px; }
+  .preview-body .cover-sub { font-size: 20px; text-align: center; color: var(--accent); margin-bottom: 30px; }
+  .preview-body .page-break { border-top: 1px dashed #ccc; margin: 30px 0; padding-top: 16px; }
+  .preview-body .signature-block { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; }
+  .preview-body .signature-block > div { border: 1px solid var(--border); padding: 12px; border-radius: 6px; background: #fff; }
+  .preview-body .sig-header { font-weight: 700; color: var(--primary); text-align: center; background: var(--light-bg); padding: 6px; margin: -12px -12px 10px; border-radius: 6px 6px 0 0; }
+
+  /* Footer toolbar */
+  .toolbar-bottom {
+    position: sticky; bottom: 0; z-index: 50;
+    background: #fff; border-top: 1px solid var(--border);
+    padding: 14px 24px; display: flex; gap: 10px; justify-content: center;
+    box-shadow: 0 -2px 12px rgba(0,0,0,0.05);
+  }
+  .btn-large { padding: 12px 28px; font-size: 15px; font-weight: 600; }
+  .btn-success { background: var(--primary); color: #fff; }
+  .btn-success:hover { background: var(--primary-light); }
+  .btn-success:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* Inline editable in preview */
+  .editable {
+    position: relative;
+    cursor: text;
+    border: 1px dashed transparent;
+    border-radius: 5px;
+    padding: 3px 6px;
+    margin: 2px 0;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .editable:hover {
+    background: rgba(11, 83, 69, 0.05);
+    border-color: rgba(11, 83, 69, 0.25);
+  }
+  .editable:hover::after {
+    content: '✏ انقر للتعديل';
+    position: absolute;
+    top: -22px;
+    right: 6px;
+    font-size: 10px;
+    background: var(--primary);
+    color: #fff;
+    padding: 2px 7px;
+    border-radius: 4px;
+    z-index: 10;
+    font-family: 'Tajawal', sans-serif;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .editable.editing {
+    background: #FFFBEB !important;
+    border-color: var(--warning) !important;
+    border-style: solid;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.15);
+  }
+  .editable.editing::after { display: none; }
+  .editable.modified {
+    background: rgba(30, 132, 73, 0.06);
+    border-color: rgba(30, 132, 73, 0.3);
+  }
+  .editable.modified::before {
+    content: '✓ معدّل';
+    position: absolute;
+    top: -10px;
+    right: 8px;
+    font-size: 10px;
+    background: var(--accent);
+    color: #fff;
+    padding: 1px 7px;
+    border-radius: 4px;
+    font-family: 'Tajawal', sans-serif;
+    z-index: 5;
+  }
+  .reset-clause, .delete-clause {
+    display: inline-block;
+    background: none;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    font-size: 11px;
+    cursor: pointer;
+    margin-right: 4px;
+    padding: 0;
+    line-height: 18px;
+    text-align: center;
+    vertical-align: middle;
+    font-family: 'Tajawal', sans-serif;
+    transition: all 0.2s;
+  }
+  .reset-clause { border: 1px solid var(--accent); color: var(--accent); }
+  .reset-clause:hover { background: var(--accent); color: #fff; }
+  .delete-clause { border: 1px solid var(--danger); color: var(--danger); opacity: 0; }
+  .editable:hover + .delete-clause,
+  .delete-clause:hover,
+  p:hover > .delete-clause,
+  div:hover > .delete-clause { opacity: 1; }
+  .delete-clause:hover { background: var(--danger); color: #fff; transform: scale(1.1); }
+  /* Always-visible delete on hover of clause container */
+  p:hover .delete-clause, div.bullet:hover .delete-clause, div.definition:hover .delete-clause { opacity: 1; }
+  /* Deleted items panel */
+  .deleted-panel {
+    background: linear-gradient(135deg, #FEF2F2, #FEE2E2);
+    border-right: 4px solid var(--danger);
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 14px;
+  }
+  .deleted-panel-header {
+    display: flex; justify-content: space-between; align-items: center;
+    cursor: pointer; font-weight: 700; color: var(--danger); font-size: 14px;
+  }
+  .deleted-panel.collapsed .deleted-panel-body { display: none; }
+  .deleted-panel-body { margin-top: 10px; max-height: 250px; overflow-y: auto; }
+  .deleted-item {
+    background: #fff; border: 1px solid #FCA5A5; border-radius: 6px;
+    padding: 8px 12px; margin-bottom: 6px; display: flex; gap: 10px;
+    align-items: flex-start; font-size: 12px; color: #555;
+  }
+  .deleted-item-text { flex: 1; line-height: 1.5; }
+  .deleted-item-text b { color: var(--primary); }
+  .deleted-restore {
+    background: var(--accent); color: #fff; border: none;
+    border-radius: 5px; padding: 5px 10px; cursor: pointer;
+    font-family: 'Tajawal', sans-serif; font-size: 12px; font-weight: 600;
+    white-space: nowrap;
+  }
+  .deleted-restore:hover { background: var(--primary-light); }
+  .edit-hint {
+    background: linear-gradient(135deg, #FFF9E6, #FEF3C7);
+    border-right: 4px solid var(--warning);
+    padding: 10px 14px;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 14px;
+    font-size: 13px;
+    color: #92400E;
+  }
+
+  /* Helper */
+  .help { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .badge-info { background: var(--light-bg); color: var(--primary); }
+  .badge-warn { background: #FFF4E5; color: var(--warning); }
+  .info-box { background: var(--light-bg); border-right: 4px solid var(--primary); padding: 12px 16px; margin-bottom: 14px; border-radius: 0 8px 8px 0; font-size: 13px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .toggle-row { display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--light-bg); border-radius: 8px; margin-bottom: 12px; }
+  .toast {
+    position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
+    background: var(--primary); color: #fff; padding: 14px 24px;
+    border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    z-index: 1000; font-weight: 500; animation: slideDown 0.3s ease;
+  }
+  @keyframes slideDown { from { transform: translate(-50%, -20px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+  .toast.error { background: var(--danger); }
+
+  /* Mobile preview hidden */
+  @media (max-width: 900px) {
+    .preview-panel { position: relative; top: 0; max-height: 600px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-header-inner">
+    <div class="brand">
+      <svg width="36" height="36" viewBox="0 0 40 40" fill="none">
+        <rect width="40" height="40" rx="8" fill="#fff" opacity="0.15"/>
+        <path d="M20 8 L30 28 L10 28 Z" stroke="#fff" stroke-width="2" fill="none"/>
+        <circle cx="20" cy="22" r="3" fill="#fff"/>
+      </svg>
+      <div>
+        <div class="brand-name">نظام عقود عوجا سكن</div>
+        <div class="brand-sub">Ouja Residence Contract Builder</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-ghost" onclick="resetForm()">↺ إعادة تعيين</button>
+      <button class="btn btn-ghost" onclick="loadSample()">📋 بيانات تجريبية</button>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- ============== FORM PANEL ============== -->
+<aside class="form-panel">
+
+  <!-- Section 1: Contract Setup -->
+  <div class="section" id="sec-setup">
+    <div class="section-header" onclick="toggleSection('sec-setup')">
+      <span>① إعدادات العقد الأساسية</span>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="section-body">
+
+      <div class="field">
+        <label>نوع المالك</label>
+        <div class="radio-group" id="partyTypeGroup">
+          <label class="radio-option selected" onclick="setPartyType('single')"><input type="radio" name="partyType" value="single" checked>مالك واحد</label>
+          <label class="radio-option" onclick="setPartyType('multi')"><input type="radio" name="partyType" value="multi">شراكة / متعدد المُلاك</label>
+        </div>
+        <div class="help">اختر "شراكة" إذا كان العقار مملوكاً لأكثر من شخص (شركاء أو ورثة).</div>
+      </div>
+
+      <div class="field">
+        <label>عدد العقارات في العقد</label>
+        <div class="radio-group" id="unitTypeGroup">
+          <label class="radio-option selected" onclick="setUnitType('single')"><input type="radio" name="unitType" value="single" checked>عقار واحد</label>
+          <label class="radio-option" onclick="setUnitType('multi')"><input type="radio" name="unitType" value="multi">عقارات متعددة</label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>تكرار تحويل صافي الإيرادات للمالك</label>
+        <div class="radio-group" id="freqGroup">
+          <label class="radio-option selected" onclick="setFreq('monthly')"><input type="radio" name="freq" value="monthly" checked>شهري</label>
+          <label class="radio-option" onclick="setFreq('quarterly')"><input type="radio" name="freq" value="quarterly">ربع سنوي</label>
+          <label class="radio-option" onclick="setFreq('semi')"><input type="radio" name="freq" value="semi">نصف سنوي</label>
+          <label class="radio-option" onclick="setFreq('annual')"><input type="radio" name="freq" value="annual">سنوي</label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>عملة التحويل للمالك</label>
+        <div class="radio-group" id="currencyGroup">
+          <label class="radio-option selected" onclick="setCurrency('sar')"><input type="radio" name="currency" value="sar" checked>ريال سعودي (مع تحويل من الدولار)</label>
+          <label class="radio-option" onclick="setCurrency('usd')"><input type="radio" name="currency" value="usd">دولار أمريكي (مباشرة)</label>
+        </div>
+      </div>
+
+      <div class="field" id="rateField">
+        <label>معدل صرف الدولار للريال (المعتمد في العقد)</label>
+        <input type="number" id="exchangeRate" step="0.001" value="3.741">
+        <div class="help">المعدل القياسي للبنوك السعودية هو ٣.٧٤١ ريال للدولار.</div>
+      </div>
+
+      <div class="field-row">
+        <div>
+          <label>مدينة التحرير</label>
+          <input type="text" id="city" value="الرياض">
+        </div>
+        <div>
+          <label>تاريخ التحرير (ميلادي)</label>
+          <input type="date" id="contractDate">
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Section 2: Owners (Party 1) -->
+  <div class="section" id="sec-owners">
+    <div class="section-header" onclick="toggleSection('sec-owners')">
+      <span>② بيانات المالك (الطرف الأول)</span>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div id="ownersContainer"></div>
+      <button class="add-btn" id="addOwnerBtn" onclick="addOwner()" style="display:none">+ إضافة مالك إضافي</button>
+    </div>
+  </div>
+
+  <!-- Section 3: Manager (Party 2) -->
+  <div class="section collapsed" id="sec-manager">
+    <div class="section-header" onclick="toggleSection('sec-manager')">
+      <span>③ بيانات الشركة (الطرف الثاني) — قابلة للتعديل</span>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="info-box">هذه البيانات تم تعبئتها تلقائياً ببيانات عوجا سكن. عدّلها إذا احتجت.</div>
+      <div class="field">
+        <label>الاسم التجاري</label>
+        <input type="text" id="mgrName" value="شركة عوجا سكن لإدارة الأملاك">
+      </div>
+      <div class="field-row">
+        <div>
+          <label>السجل الوطني الموحد</label>
+          <input type="text" id="mgrReg" value="7050158810">
+        </div>
+        <div>
+          <label>المركز الرئيسي</label>
+          <input type="text" id="mgrAddress" value="الرياض — حي المعذر الشمالي">
+        </div>
+      </div>
+      <div class="field-row">
+        <div>
+          <label>الممثل القانوني</label>
+          <input type="text" id="mgrRep" value="الأستاذ / فيصل بن نصار">
+        </div>
+        <div>
+          <label>الصفة</label>
+          <input type="text" id="mgrRepTitle" value="الرئيس التنفيذي">
+        </div>
+      </div>
+      <div class="field-row">
+        <div>
+          <label>الهاتف</label>
+          <input type="text" id="mgrPhone" value="+966 53 377 9297">
+        </div>
+        <div>
+          <label>البريد الإلكتروني</label>
+          <input type="email" id="mgrEmail" value="info@oujares.com">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 4: Properties -->
+  <div class="section" id="sec-properties">
+    <div class="section-header" onclick="toggleSection('sec-properties')">
+      <span>④ العقار / العقارات محل العقد</span>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div id="propertiesContainer"></div>
+      <button class="add-btn" id="addPropBtn" onclick="addProperty()" style="display:none">+ إضافة عقار آخر</button>
+    </div>
+  </div>
+
+  <!-- Section 5: Financial Terms -->
+  <div class="section collapsed" id="sec-financial">
+    <div class="section-header" onclick="toggleSection('sec-financial')">
+      <span>⑤ الشروط المالية</span>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="field-row">
+        <div>
+          <label>نسبة إدارة المدير (%)</label>
+          <input type="number" id="mgmtFee" value="20" min="0" max="100" step="0.5">
+        </div>
+        <div>
+          <label>صلاحية صرف المدير شهرياً (ر.س)</label>
+          <input type="number" id="maintFloat" value="500" min="0">
+          <div class="help">المبلغ الذي يحق للمدير صرفه شهرياً لصيانة أو تنظيف عميق دون الرجوع للمالك.</div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div>
+          <label>هامش تفاوت رسوم التنظيف (% +/-)</label>
+          <input type="number" id="cleaningVar" value="30" min="0" max="100">
+        </div>
+        <div>
+          <label>حد أدنى للتأمين الشامل (ر.س)</label>
+          <input type="number" id="insMin" value="1000000" min="0" step="100000">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 6: Durations -->
+  <div class="section collapsed" id="sec-durations">
+    <div class="section-header" onclick="toggleSection('sec-durations')">
+      <span>⑥ المدد والإشعارات</span>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="field-row">
+        <div>
+          <label>مدة العقد (بالأشهر)</label>
+          <input type="number" id="contractMonths" value="12" min="1">
+        </div>
+        <div>
+          <label>إشعار عدم التجديد (يوم)</label>
+          <input type="number" id="renewNotice" value="60" min="1">
+        </div>
+      </div>
+      <div class="field-row">
+        <div>
+          <label>إنهاء اختياري بإشعار (يوم)</label>
+          <input type="number" id="voluntaryNotice" value="90" min="1">
+        </div>
+        <div>
+          <label>إنهاء بصفر حجوزات (يوم متواصل)</label>
+          <input type="number" id="zeroBookings" value="60" min="1">
+        </div>
+      </div>
+      <div class="field-row">
+        <div>
+          <label>السرية بعد العقد (سنة)</label>
+          <input type="number" id="confYears" value="2" min="1">
+        </div>
+        <div>
+          <label>عدم المنافسة بعد العقد (شهر)</label>
+          <input type="number" id="ncMonths" value="12" min="1" max="24">
+        </div>
+      </div>
+      <div class="field-row">
+        <div>
+          <label>أيام الاستخدام الشخصي السنوي (يوم)</label>
+          <input type="number" id="personalUseDays" value="30" min="0">
+        </div>
+        <div>
+          <label>إشعار الاستخدام الشخصي (يوم)</label>
+          <input type="number" id="personalUseNotice" value="15" min="1">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 7: Penalties -->
+  <div class="section collapsed" id="sec-penalties">
+    <div class="section-header" onclick="toggleSection('sec-penalties')">
+      <span>⑦ الشروط الجزائية</span>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="info-box">هذه القيم خاضعة للسلطة التقديرية للقاضي (المادة ١٧٩ من نظام المعاملات المدنية). تم اعتماد قيم معقولة لتصمد قضائياً.</div>
+      <div class="field-row">
+        <div>
+          <label>إخلال الحصرية (ر.س)</label>
+          <input type="number" id="penExcl" value="25000" min="0" step="1000">
+        </div>
+        <div>
+          <label>إخلال السرية (ر.س)</label>
+          <input type="number" id="penConf" value="15000" min="0" step="1000">
+        </div>
+      </div>
+      <div class="field-row">
+        <div>
+          <label>استقطاب الموظفين (ر.س)</label>
+          <input type="number" id="penSol" value="30000" min="0" step="1000">
+        </div>
+        <div>
+          <label>استخدام المحتوى الفكري (ر.س)</label>
+          <input type="number" id="penIp" value="10000" min="0" step="1000">
+        </div>
+      </div>
+      <div class="field-row">
+        <div>
+          <label>إنهاء قبل المدة (متوسط رسوم x شهر)</label>
+          <input type="number" id="penEarlyMonths" value="2" min="1" max="12">
+        </div>
+        <div>
+          <label>استخدام مع حجز قائم (إضافي ر.س)</label>
+          <input type="number" id="penUseExtra" value="2000" min="0" step="500">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 8: Custom Clauses -->
+  <div class="section collapsed" id="sec-custom">
+    <div class="section-header" onclick="toggleSection('sec-custom')">
+      <span>⑧ بنود مخصصة (اختياري)</span>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="info-box">أضف أي بنود إضافية تريد تضمينها في العقد، ستظهر في فصل "أحكام إضافية" قبل التوقيع.</div>
+      <div id="customContainer"></div>
+      <button class="add-btn" onclick="addCustomClause()">+ إضافة بند مخصص</button>
+    </div>
+  </div>
+
+</aside>
+
+<!-- ============== PREVIEW PANEL ============== -->
+<section class="preview-panel">
+  <div class="preview-header">
+    <h3>📄 معاينة مباشرة — انقر على أي بند للتعديل</h3>
+    <button class="btn btn-ghost" style="font-size:12px;padding:6px 12px" onclick="resetAllOverrides()">↺ إعادة كل البنود للأصلي</button>
+  </div>
+  <div class="preview-body" id="preview">
+    <p style="text-align:center;color:#999;padding:40px">جاري التحميل...</p>
+  </div>
+</section>
+
+</div>
+
+<!-- ============== TOOLBAR ============== -->
+<div class="toolbar-bottom">
+  <button class="btn btn-large btn-success" onclick="downloadWord()">⬇ تحميل العقد (Word)</button>
+  <button class="btn btn-large btn-secondary" onclick="window.print()">🖨 طباعة / PDF</button>
+  <button class="btn btn-large btn-secondary" onclick="copyHTML()">📋 نسخ HTML</button>
+</div>
+
+<script>
+// ===================== STATE =====================
+let state = {
+  partyType: 'single',
+  unitType: 'single',
+  freq: 'monthly',
+  currency: 'sar',
+  exchangeRate: 3.741,
+  city: 'الرياض',
+  contractDate: '',
+  owners: [createDefaultOwner()],
+  manager: {
+    name: 'شركة عوجا سكن لإدارة الأملاك',
+    reg: '7050158810',
+    address: 'الرياض — حي المعذر الشمالي',
+    rep: 'الأستاذ / فيصل بن نصار',
+    repTitle: 'الرئيس التنفيذي',
+    phone: '+966 53 377 9297',
+    email: 'info@oujares.com',
+  },
+  properties: [createDefaultProperty('A1')],
+  financial: { mgmtFee: 20, maintFloat: 500, cleaningVar: 30, insMin: 1000000 },
+  durations: { contractMonths: 12, renewNotice: 60, voluntaryNotice: 90, zeroBookings: 60, confYears: 2, ncMonths: 12, personalUseDays: 30, personalUseNotice: 15 },
+  penalties: { excl: 25000, conf: 15000, sol: 30000, ip: 10000, earlyMonths: 2, useExtra: 2000 },
+  customClauses: [],
+  overrides: {}, // { 'clause-٢-١': 'custom text', 'def-العقد': 'custom def', 'bullet-X-0': 'custom bullet' }
+  deleted: {}, // { 'clause-٢-١': { text: 'original', label: 'البند ٢-١' } }
+  deletedPanelOpen: false,
+};
+
+function createDefaultOwner() {
+  return { name: '', id: '', nationality: 'سعودي', phone: '', email: '', address: '', ibanSar: '', ibanUsd: '', capacity: 'مالك أصلي', percent: 100, agencyNo: '' };
+}
+function createDefaultProperty(code) {
+  return { code: code || 'A1', address: '', type: 'شقة سكنية', beds: 3, permit: '', titleDeed: '', cleaningFee: 1000 };
+}
+
+// ===================== HELPERS =====================
+const FREQ_LABELS = { monthly: 'شهري', quarterly: 'ربع سنوي', semi: 'نصف سنوي', annual: 'سنوي' };
+const FREQ_DAYS = { monthly: 15, quarterly: 15, semi: 15, annual: 15 };
+const FREQ_PERIOD_AR = { monthly: 'الشهر', quarterly: 'الربع السنوي', semi: 'النصف السنوي', annual: 'السنة' };
+
+function ar(num) { return num.toString().replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]); }
+function fmtMoney(n) { return n.toLocaleString('en-US'); }
+function todayIso() { return new Date().toISOString().split('T')[0]; }
+
+function showToast(msg, isError) {
+  const t = document.createElement('div');
+  t.className = 'toast' + (isError ? ' error' : '');
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+// ===================== UI BUILD =====================
+function toggleSection(id) {
+  document.getElementById(id).classList.toggle('collapsed');
+}
+
+function setPartyType(t) {
+  state.partyType = t;
+  document.querySelectorAll('#partyTypeGroup .radio-option').forEach(el => el.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+  document.getElementById('addOwnerBtn').style.display = t === 'multi' ? 'block' : 'none';
+  if (t === 'single' && state.owners.length > 1) state.owners = [state.owners[0]];
+  renderOwners();
+  updatePreview();
+}
+
+function setUnitType(t) {
+  state.unitType = t;
+  document.querySelectorAll('#unitTypeGroup .radio-option').forEach(el => el.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+  document.getElementById('addPropBtn').style.display = t === 'multi' ? 'block' : 'none';
+  if (t === 'single' && state.properties.length > 1) state.properties = [state.properties[0]];
+  renderProperties();
+  updatePreview();
+}
+
+function setFreq(f) {
+  state.freq = f;
+  document.querySelectorAll('#freqGroup .radio-option').forEach(el => el.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+  updatePreview();
+}
+
+function setCurrency(c) {
+  state.currency = c;
+  document.querySelectorAll('#currencyGroup .radio-option').forEach(el => el.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+  document.getElementById('rateField').style.display = c === 'sar' ? 'block' : 'none';
+  updatePreview();
+}
+
+function renderOwners() {
+  const c = document.getElementById('ownersContainer');
+  c.innerHTML = '';
+  state.owners.forEach((o, idx) => {
+    const div = document.createElement('div');
+    div.className = 'repeater-item';
+    const showPercent = state.partyType === 'multi';
+    div.innerHTML = `
+      <div class="repeater-item-header">
+        <span class="repeater-item-title">${state.partyType === 'multi' ? `المالك ${ar(idx + 1)}` : 'بيانات المالك'}</span>
+        ${state.owners.length > 1 ? `<button class="icon-btn" onclick="removeOwner(${idx})">✕ حذف</button>` : ''}
+      </div>
+      <div class="field"><label>الاسم الكامل <span class="req">*</span></label><input type="text" value="${o.name}" oninput="updateOwner(${idx},'name',this.value)"></div>
+      <div class="field-row">
+        <div><label>رقم الهوية / الإقامة</label><input type="text" value="${o.id}" oninput="updateOwner(${idx},'id',this.value)"></div>
+        <div><label>الجنسية</label><input type="text" value="${o.nationality}" oninput="updateOwner(${idx},'nationality',this.value)"></div>
+      </div>
+      <div class="field-row">
+        <div><label>رقم الجوال</label><input type="tel" value="${o.phone}" oninput="updateOwner(${idx},'phone',this.value)" placeholder="05XXXXXXXX"></div>
+        <div><label>البريد الإلكتروني</label><input type="email" value="${o.email}" oninput="updateOwner(${idx},'email',this.value)"></div>
+      </div>
+      <div class="field"><label>العنوان الوطني</label><input type="text" value="${o.address}" oninput="updateOwner(${idx},'address',this.value)"></div>
+      <div class="field-row">
+        <div><label>الآيبان (ريال)</label><input type="text" value="${o.ibanSar}" oninput="updateOwner(${idx},'ibanSar',this.value)" placeholder="SA..."></div>
+        <div><label>الحساب الدولاري (SNB)</label><input type="text" value="${o.ibanUsd}" oninput="updateOwner(${idx},'ibanUsd',this.value)" placeholder="SA..."></div>
+      </div>
+      <div class="field-row">
+        <div><label>الصفة في التعاقد</label>
+          <select onchange="updateOwner(${idx},'capacity',this.value)">
+            <option value="مالك أصلي" ${o.capacity==='مالك أصلي'?'selected':''}>مالك أصلي</option>
+            <option value="وكيل بموجب وكالة" ${o.capacity==='وكيل بموجب وكالة'?'selected':''}>وكيل بموجب وكالة</option>
+            <option value="وريث" ${o.capacity==='وريث'?'selected':''}>وريث (صك حصر إرث)</option>
+            <option value="ممثل قانوني لشركة" ${o.capacity==='ممثل قانوني لشركة'?'selected':''}>ممثل قانوني لشركة</option>
+          </select>
+        </div>
+        <div><label>رقم الوكالة (إن وُجد)</label><input type="text" value="${o.agencyNo}" oninput="updateOwner(${idx},'agencyNo',this.value)"></div>
+      </div>
+      ${showPercent ? `<div class="field"><label>نسبة الملكية (%)</label><input type="number" min="0" max="100" step="0.1" value="${o.percent}" oninput="updateOwner(${idx},'percent',+this.value)"></div>` : ''}
+    `;
+    c.appendChild(div);
+  });
+}
+
+function addOwner() {
+  state.owners.push(createDefaultOwner());
+  renderOwners();
+  updatePreview();
+}
+function removeOwner(idx) {
+  state.owners.splice(idx, 1);
+  renderOwners();
+  updatePreview();
+}
+function updateOwner(idx, key, val) {
+  state.owners[idx][key] = val;
+  updatePreview();
+}
+
+function renderProperties() {
+  const c = document.getElementById('propertiesContainer');
+  c.innerHTML = '';
+  state.properties.forEach((p, idx) => {
+    const div = document.createElement('div');
+    div.className = 'repeater-item';
+    div.innerHTML = `
+      <div class="repeater-item-header">
+        <span class="repeater-item-title">العقار ${ar(idx + 1)}</span>
+        ${state.properties.length > 1 ? `<button class="icon-btn" onclick="removeProperty(${idx})">✕ حذف</button>` : ''}
+      </div>
+      <div class="field-row">
+        <div><label>رمز الوحدة</label><input type="text" value="${p.code}" oninput="updateProp(${idx},'code',this.value)" placeholder="A1, B2..."></div>
+        <div><label>النوع</label>
+          <select onchange="updateProp(${idx},'type',this.value)">
+            <option value="شقة سكنية" ${p.type==='شقة سكنية'?'selected':''}>شقة سكنية</option>
+            <option value="فيلا" ${p.type==='فيلا'?'selected':''}>فيلا</option>
+            <option value="استوديو" ${p.type==='استوديو'?'selected':''}>استوديو</option>
+            <option value="شاليه" ${p.type==='شاليه'?'selected':''}>شاليه</option>
+            <option value="دور كامل" ${p.type==='دور كامل'?'selected':''}>دور كامل</option>
+          </select>
+        </div>
+      </div>
+      <div class="field"><label>العنوان الكامل</label><input type="text" value="${p.address}" oninput="updateProp(${idx},'address',this.value)" placeholder="الحي، الشارع، المبنى..."></div>
+      <div class="field-row-3">
+        <div><label>عدد الغرف</label><input type="number" value="${p.beds}" min="0" oninput="updateProp(${idx},'beds',+this.value)"></div>
+        <div><label>رسوم التنظيف الشهرية (ر.س)</label><input type="number" value="${p.cleaningFee}" min="0" oninput="updateProp(${idx},'cleaningFee',+this.value)"></div>
+        <div><label>رقم التصريح السياحي</label><input type="text" value="${p.permit}" oninput="updateProp(${idx},'permit',this.value)"></div>
+      </div>
+      <div class="field"><label>رقم الصك / عقد الإيجار (اختياري)</label><input type="text" value="${p.titleDeed}" oninput="updateProp(${idx},'titleDeed',this.value)"></div>
+    `;
+    c.appendChild(div);
+  });
+}
+function addProperty() {
+  const nextCode = String.fromCharCode(65 + Math.floor(state.properties.length / 9)) + (state.properties.length % 9 + 1);
+  state.properties.push(createDefaultProperty(nextCode));
+  renderProperties();
+  updatePreview();
+}
+function removeProperty(idx) {
+  state.properties.splice(idx, 1);
+  renderProperties();
+  updatePreview();
+}
+function updateProp(idx, key, val) {
+  state.properties[idx][key] = val;
+  updatePreview();
+}
+
+function addCustomClause() {
+  state.customClauses.push({ title: '', body: '' });
+  renderCustomClauses();
+  updatePreview();
+}
+function removeCustomClause(idx) {
+  state.customClauses.splice(idx, 1);
+  renderCustomClauses();
+  updatePreview();
+}
+function updateCustom(idx, key, val) {
+  state.customClauses[idx][key] = val;
+  updatePreview();
+}
+function renderCustomClauses() {
+  const c = document.getElementById('customContainer');
+  c.innerHTML = '';
+  state.customClauses.forEach((cc, idx) => {
+    const div = document.createElement('div');
+    div.className = 'repeater-item';
+    div.innerHTML = `
+      <div class="repeater-item-header">
+        <span class="repeater-item-title">بند مخصص ${ar(idx + 1)}</span>
+        <button class="icon-btn" onclick="removeCustomClause(${idx})">✕ حذف</button>
+      </div>
+      <div class="field"><label>عنوان البند</label><input type="text" value="${cc.title}" oninput="updateCustom(${idx},'title',this.value)" placeholder="مثل: شرط إضافي للصيانة الموسمية"></div>
+      <div class="field"><label>نص البند</label><textarea oninput="updateCustom(${idx},'body',this.value)" rows="4" placeholder="اكتب نص البند بالكامل...">${cc.body}</textarea></div>
+    `;
+    c.appendChild(div);
+  });
+}
+
+// ===================== STATE SYNC =====================
+function syncStateFromInputs() {
+  state.exchangeRate = +document.getElementById('exchangeRate').value || 3.741;
+  state.city = document.getElementById('city').value;
+  state.contractDate = document.getElementById('contractDate').value;
+  state.manager.name = document.getElementById('mgrName').value;
+  state.manager.reg = document.getElementById('mgrReg').value;
+  state.manager.address = document.getElementById('mgrAddress').value;
+  state.manager.rep = document.getElementById('mgrRep').value;
+  state.manager.repTitle = document.getElementById('mgrRepTitle').value;
+  state.manager.phone = document.getElementById('mgrPhone').value;
+  state.manager.email = document.getElementById('mgrEmail').value;
+  state.financial.mgmtFee = +document.getElementById('mgmtFee').value;
+  state.financial.maintFloat = +document.getElementById('maintFloat').value;
+  state.financial.cleaningVar = +document.getElementById('cleaningVar').value;
+  state.financial.insMin = +document.getElementById('insMin').value;
+  state.durations.contractMonths = +document.getElementById('contractMonths').value;
+  state.durations.renewNotice = +document.getElementById('renewNotice').value;
+  state.durations.voluntaryNotice = +document.getElementById('voluntaryNotice').value;
+  state.durations.zeroBookings = +document.getElementById('zeroBookings').value;
+  state.durations.confYears = +document.getElementById('confYears').value;
+  state.durations.ncMonths = +document.getElementById('ncMonths').value;
+  state.durations.personalUseDays = +document.getElementById('personalUseDays').value;
+  state.durations.personalUseNotice = +document.getElementById('personalUseNotice').value;
+  state.penalties.excl = +document.getElementById('penExcl').value;
+  state.penalties.conf = +document.getElementById('penConf').value;
+  state.penalties.sol = +document.getElementById('penSol').value;
+  state.penalties.ip = +document.getElementById('penIp').value;
+  state.penalties.earlyMonths = +document.getElementById('penEarlyMonths').value;
+  state.penalties.useExtra = +document.getElementById('penUseExtra').value;
+}
+
+// ===================== CONTRACT TEXT BUILDER =====================
+// Returns the contract as a structured array of blocks for rendering & docx generation
+function buildContract() {
+  syncStateFromInputs();
+  const s = state;
+  const owners = s.owners;
+  const props = s.properties;
+  const isMulti = s.partyType === 'multi';
+  const isMultiProp = s.unitType === 'multi';
+  const ownerLabel = isMulti ? 'المُلاك' : 'المالك';
+  const propLabel = isMultiProp ? 'العقارات' : 'العقار';
+  const freqLabel = FREQ_LABELS[s.freq];
+  const period = FREQ_PERIOD_AR[s.freq];
+  const dateStr = s.contractDate || '____ / ____ / 2026';
+  const currency = s.currency === 'sar' ? 'الريال السعودي' : 'الدولار الأمريكي';
+  const rateNote = s.currency === 'sar' ? ` على أن يتم احتساب التحويل من الدولار إلى الريال بمعدل صرف ثابت قدره (${s.exchangeRate}) ريال سعودي لكل دولار أمريكي، وهو معدل البنوك القياسي المعتمد` : '';
+
+  let blocks = [];
+
+  // Cover
+  blocks.push({ type: 'cover', city: s.city, date: dateStr, mgmtFee: s.financial.mgmtFee, months: s.durations.contractMonths });
+
+  // Parties
+  blocks.push({ type: 'heading', level: 1, num: 'التمهيدي', text: 'أطراف العقد وبياناتهم' });
+  blocks.push({ type: 'p', text: `إنه في يوم ______ الموافق ${dateStr}م، وفي مدينة ${s.city} بالمملكة العربية السعودية، تم إبرام هذا العقد بين كل من:` });
+
+  // Owners table(s)
+  owners.forEach((o, i) => {
+    blocks.push({ type: 'partyBox', idx: i, title: isMulti ? `الطرف الأول (المالك ${ar(i+1)})` : 'الطرف الأول — المالك', party: o, kind: 'owner', showPercent: isMulti });
+  });
+  blocks.push({ type: 'p', text: `ويُشار إليه${isMulti ? 'م مجتمعين' : ''} في هذا العقد بـ «${ownerLabel}» أو «الطرف الأول».` });
+
+  // Manager
+  blocks.push({ type: 'partyBox', title: 'الطرف الثاني — المدير', party: s.manager, kind: 'manager' });
+  blocks.push({ type: 'p', text: 'ويُشار إليها في هذا العقد بـ «المدير» أو «الطرف الثاني».' });
+  blocks.push({ type: 'p', text: 'ويُشار إلى كل منهما منفرداً بـ «الطرف» ومجتمعَين بـ «الطرفان».' });
+
+  // Property table
+  blocks.push({ type: 'subheading', text: isMultiProp ? 'العقارات محل العقد' : 'العقار محل العقد' });
+  blocks.push({ type: 'propertyTable', properties: props });
+  blocks.push({ type: 'p', text: `ويُشار إلى ما تقدّم في هذا العقد بـ «${propLabel}».` });
+
+  // Preamble
+  blocks.push({ type: 'heading', level: 1, num: 'التمهيدي', text: 'ديباجة العقد' });
+  blocks.push({ type: 'p', text: `لما كان ${ownerLabel} ${isMulti ? 'هم المُلاك الشرعيون والنظاميون للعقار' : 'هو المالك الشرعي والنظامي للعقار'} الموصوف أعلاه، أو ${isMulti ? 'المشغّلون المفوّضون' : 'المشغّل المفوّض'} بموجب وكالة سارية، ويحمل تصريح مرفق ضيافة خاصة ساري المفعول من وزارة السياحة في المملكة العربية السعودية؛` });
+  blocks.push({ type: 'p', text: 'ولما كان المدير شركةً سعودية مرخّصة قانوناً ومسجلة لدى الجهات المختصة، متخصصة في إدارة العقارات وتشغيلها بنظام التأجير اليومي / الأسبوعي / الشهري عبر منصات الحجز الإلكترونية؛' });
+  blocks.push({ type: 'p', text: `ولما كان ${ownerLabel} ${isMulti ? 'يرغبون' : 'يرغب'} في تفويض المدير حصرياً بإدارة وتشغيل وتسويق ${propLabel} محل هذا العقد بنظام التأجير اليومي / الأسبوعي / الشهري؛ وكان المدير يقبل هذا التفويض ويتعهد ببذل العناية المهنية اللازمة لتحقيق أفضل عائد ممكن؛` });
+  blocks.push({ type: 'p', text: 'وبعد أن أقرّ كلٌ من الطرفين بأهليته الكاملة شرعاً ونظاماً لإبرام هذا العقد، وبأنه قرأ بنوده وفهم مضمونها فهماً تاماً، وأنه يبرمه عن رضاً واختيار؛' });
+  blocks.push({ type: 'p', text: 'وحيث إن صياغة هذا العقد روعي فيها أحكام نظام المعاملات المدنية الصادر بالمرسوم الملكي رقم (م/١٩١) وتاريخ ١٤٤٤/١١/٢٩هـ ولوائحه التنفيذية، وسائر الأنظمة ذات الصلة المعمول بها في المملكة العربية السعودية؛' });
+  blocks.push({ type: 'centerBold', text: 'فقد اتفق الطرفان وهما بكامل أهليتهما المعتبرة شرعاً ونظاماً على ما يلي:' });
+
+  // Chapter 1: Definitions
+  blocks.push({ type: 'heading', level: 1, num: 'الأول', text: 'التعريفات' });
+  blocks.push({ type: 'p', text: '١-١  يكون للألفاظ الآتية في هذا العقد المعاني المبيّنة قرين كلٍ منها، ما لم يقتضِ السياق خلاف ذلك:' });
+  const defs = [
+    ['العقد', 'هذا العقد بما يشمل ديباجته وملاحقه وأي تعديلات لاحقة باتفاق كتابي.'],
+    ['الطرفان', `${ownerLabel} والمدير مجتمعَين.`],
+    [propLabel, `الوحدة${isMultiProp ? 'ات' : ''} السكنية المبيّنة في جدول العقار، بما تشمله من أثاثٍ وتجهيزاتٍ ومرافق.`],
+    ['منصة الحجز', 'أي منصة إلكترونية للتأجير قصير الأمد (يومي / أسبوعي / شهري) مثل Airbnb وBooking.com.'],
+    ['الإيرادات الإجمالية', `مجموع المدفوعات المستلمة من الضيوف عبر منصات الحجز.`],
+    ['صافي إيرادات الإيجار', 'الإيرادات الإجمالية بعد خصم رسوم المنصة ومعالجة المدفوعات وضريبة القيمة المضافة التي تحصّلها المنصة.'],
+    ['نسبة الإدارة', `حصة المدير وقدرها (${s.financial.mgmtFee}%) من صافي إيرادات الإيجار.`],
+    ['المصروفات التشغيلية', 'التكاليف اليومية لتشغيل العقار: مستلزمات التنظيف، مستهلكات الضيوف، والإصلاحات البسيطة حتى (200) ريال للحادثة.'],
+    ['الإصلاح الجوهري', 'أي إصلاح تتجاوز كلفته (200) ريال أو يتعلق بأعمال هيكلية أو ميكانيكية أو كهربائية أو سباكة.'],
+    ['AirCover', 'برنامج حماية المضيف من Airbnb وفق شروطه السارية.'],
+    ['المعلومات السرية', 'البيانات المالية والاستراتيجيات التسعيرية وقوائم الضيوف وأي معلومات غير متاحة للعموم.'],
+    ['يوم العمل', 'أي يوم من الأحد إلى الخميس عدا الإجازات الرسمية في المملكة.'],
+    ['الإشعار الكتابي', 'مراسلة موثقة عبر البريد الإلكتروني المعتمد أو البريد المسجّل أو تطبيق رسائل موثّق.'],
+    ['الإخلال الجوهري', 'أي إخلال لا يتم تداركه خلال (15) يوماً من الإشعار الكتابي.'],
+    ['القوة القاهرة', 'كل حدث استثنائي خارج عن إرادة الأطراف يستحيل معه تنفيذ الالتزام (كوارث طبيعية، أوبئة، حروب، قرارات سيادية ملزمة).'],
+    ['الشرط الجزائي', 'التعويض الاتفاقي المتفق عليه عن الإخلال، وفق المواد (178-180) من نظام المعاملات المدنية.'],
+    ['تكرار التحويل', `${freqLabel} (يتم التحويل في موعد أقصاه اليوم الخامس عشر من ${period} التالي).`],
+  ];
+  blocks.push({ type: 'definitions', list: defs });
+
+  // Chapter 2: Purpose
+  blocks.push({ type: 'heading', level: 1, num: 'الثاني', text: 'محل العقد ونطاقه' });
+  blocks.push({ type: 'clause', num: '٢-١', text: `يفوّض ${ownerLabel} المدير — تفويضاً حصرياً — بإدارة وتشغيل وتسويق ${propLabel} بنظام التأجير اليومي / الأسبوعي / الشهري عبر منصات الحجز، ويقبل المدير هذا التفويض وفق هذا العقد.` });
+  blocks.push({ type: 'clause', num: '٢-٢', text: 'تشمل خدمات الإدارة:' });
+  blocks.push({ type: 'bullets', items: [
+    'التسعير الديناميكي اليومي وإدارة الحجوزات.',
+    'التسويق الاحترافي والتصوير وإدارة قوائم العرض.',
+    'التواصل الكامل مع الضيوف قبل وأثناء وبعد الإقامة.',
+    'إدارة الدخول الذكي والتنظيف والصيانة الاعتيادية.',
+    'تحصيل المدفوعات وإعداد التقارير المالية والتشغيلية.',
+    'التعامل مع شكاوى الضيوف والمنازعات نيابةً عن المالك.',
+  ]});
+  blocks.push({ type: 'clause', num: '٢-٣', text: 'لا يُعتبر هذا العقد توكيلاً عاماً، ولا يخوّل المدير بيع العقار أو رهنه.' });
+  blocks.push({ type: 'clause', num: '٢-٤', text: 'يُعد المدير متعاقداً مستقلاً ولا تنشئ هذه العلاقة عمالة أو شراكة قانونية.' });
+
+  // Chapter 3: Exclusivity
+  blocks.push({ type: 'heading', level: 1, num: 'الثالث', text: 'الحصرية' });
+  blocks.push({ type: 'clause', num: '٣-١', text: `للمدير حقٌ حصري لتشغيل ${propLabel} وتأجيره بنظام التأجير اليومي / الأسبوعي / الشهري طوال مدة العقد، وتشمل الحصرية كافة منصات التأجير قصير الأمد.` });
+  blocks.push({ type: 'clause', num: '٣-٢', text: `يحظر على ${ownerLabel} دون موافقة كتابية مسبقة من المدير:` });
+  blocks.push({ type: 'bullets', items: [
+    'تشغيل العقار أو تأجيره بنفسه أو بواسطة الغير.',
+    'إبرام أي عقد إدارة مع طرف ثالث.',
+    'إدراج العقار على أي منصة حجز بصورة مستقلة.',
+    'منح حق انتفاع أو إيجار طويل الأمد لطرف ثالث.',
+  ]});
+  blocks.push({ type: 'clause', num: '٣-٣', text: `تنحصر الحصرية بالوحد${isMultiProp ? 'ات' : 'ة'} المبيّنة في جدول العقار أعلاه.` });
+  blocks.push({ type: 'clause', num: '٣-٤', text: 'عند الإخلال بالحصرية، يستحق المدير الشرط الجزائي المنصوص عليه في الفصل الثاني والعشرين، دون الإخلال بحقّه في الفسخ والتعويض عن الأضرار الفعلية.' });
+
+  // Chapter 4: Term
+  blocks.push({ type: 'heading', level: 1, num: 'الرابع', text: 'مدة العقد' });
+  blocks.push({ type: 'clause', num: '٤-١', text: `تبدأ مدة العقد من تاريخ توقيعه ولمدة (${ar(s.durations.contractMonths)}) ${s.durations.contractMonths === 12 ? 'شهراً ميلادياً' : 'شهراً'}.` });
+  blocks.push({ type: 'clause', num: '٤-٢', text: `يتجدد العقد تلقائياً لمدد مماثلة ما لم يخطر أحد الطرفين الآخر كتابةً قبل (${ar(s.durations.renewNotice)}) يوماً من انتهاء المدة السارية.` });
+  blocks.push({ type: 'clause', num: '٤-٣', text: 'تخضع المدد المتجدّدة لذات الشروط، ما لم يتفق الطرفان كتابةً على خلاف ذلك.' });
+  blocks.push({ type: 'clause', num: '٤-٤', text: 'تستمر الحجوزات المؤكدة قبل انتهاء العقد سارية حتى تاريخ مغادرة الضيوف، ولو وقع بعد انتهاء العقد.' });
+
+  // Chapter 5: Manager
+  blocks.push({ type: 'heading', level: 1, num: 'الخامس', text: 'التزامات المدير' });
+  blocks.push({ type: 'clause', num: '٥-١', text: 'إدارة التسعير اليومي الديناميكي وتحسين الحجوزات عبر جميع المنصات.' });
+  blocks.push({ type: 'clause', num: '٥-٢', text: 'التواصل الاحترافي مع الضيوف بالعربية والإنجليزية على مدار الساعة.' });
+  blocks.push({ type: 'clause', num: '٥-٣', text: 'تركيب وإدارة أنظمة الوصول الذكي التلقائي.' });
+  blocks.push({ type: 'clause', num: '٥-٤', text: 'التسويق الرقمي عبر منصات التواصل الاجتماعي والتصوير الاحترافي.' });
+  blocks.push({ type: 'clause', num: '٥-٥', text: 'التنظيف المنتظم بعد كل مغادرة وتنظيف عميق دوري.' });
+  blocks.push({ type: 'clause', num: '٥-٦', text: `تحويل صافي الإيرادات المستحقة لـ${ownerLabel} ${freqLabel.includes('شهري') ? 'شهرياً' : `بشكل ${freqLabel}`} في موعد أقصاه اليوم الخامس عشر من ${period} التالي${s.currency === 'sar' ? `، وذلك إلى الحساب بالريال السعودي${rateNote}` : '، وذلك إلى الحساب الدولاري لدى البنك الأهلي السعودي (SNB)'}.` });
+  blocks.push({ type: 'clause', num: '٥-٧', text: 'حقّ الدخول للعقار لأغراض التشغيل والصيانة والاستجابة للطوارئ.' });
+  blocks.push({ type: 'clause', num: '٥-٨', text: 'الإبلاغ الفوري عن أي احتياج لإصلاحات جوهرية مع تقدير كتابي للتكلفة.' });
+  blocks.push({ type: 'clause', num: '٥-٩', text: 'تشغيل خط طوارئ للضيوف على مدار الساعة مع الاستجابة خلال ساعتين.' });
+  blocks.push({ type: 'clause', num: '٥-١٠', text: `تمثيل ${ownerLabel} أمام منصات الحجز فيما يخص النزاعات ومطالبات AirCover.` });
+  blocks.push({ type: 'clause', num: '٥-١١', text: 'الالتزام بأنظمة وزارة السياحة وكافة الجهات الإشرافية.' });
+
+  // Chapter 6: Owner
+  blocks.push({ type: 'heading', level: 1, num: 'السادس', text: `التزامات ${ownerLabel}` });
+  blocks.push({ type: 'clause', num: '٦-١', text: 'تسليم العقار في الموعد المتفق عليه مفروشاً ونظيفاً وجاهزاً للتشغيل.' });
+  blocks.push({ type: 'clause', num: '٦-٢', text: 'تقديم جميع التصاريح والوثائق، خاصةً تصريح مرفق الضيافة الساري.' });
+  blocks.push({ type: 'clause', num: '٦-٣', text: 'تحمّل الرسوم الحكومية ورسوم تجديد التصريح والاشتراكات الخدمية والضرائب.' });
+  blocks.push({ type: 'clause', num: '٦-٤', text: 'قبول استراتيجية التسعير الديناميكي وعدم التدخل في القرارات اليومية.' });
+  blocks.push({ type: 'clause', num: '٦-٥', text: `الاستجابة لطلبات الإصلاح الجوهري خلال (5) أيام عمل وتمويلها في الوقت المناسب.` });
+  blocks.push({ type: 'clause', num: '٦-٦', text: `الحفاظ على تأمين شامل بحدٍ أدنى للتغطية لا يقل عن (${fmtMoney(s.financial.insMin)}) ريال طوال مدة العقد.` });
+  blocks.push({ type: 'clause', num: '٦-٧', text: `إشعار المدير كتابةً قبل (${ar(s.durations.personalUseNotice)}) يوماً من أي استخدام شخصي.` });
+  blocks.push({ type: 'clause', num: '٦-٨', text: 'ضمان أن العقار خالٍ من أي رهون أو دعاوى أو نزاعات قائمة.' });
+  blocks.push({ type: 'clause', num: '٦-٩', text: 'تحديث المدير بأي تغييرات في البيانات الشخصية أو البنكية خلال (5) أيام.' });
+  blocks.push({ type: 'clause', num: '٦-١٠', text: 'الامتناع عن التواصل المباشر مع الضيوف أو المنصات إلا بتنسيق مع المدير.' });
+  if (isMulti) {
+    blocks.push({ type: 'clause', num: '٦-١١', text: 'يتضامن المُلاك في جميع الالتزامات الواردة في هذا العقد تضامناً مطلقاً، ويحق للمدير الرجوع على أيٍ منهم بكامل الالتزام.' });
+  }
+
+  // Chapter 7: Reps & Warranties
+  blocks.push({ type: 'heading', level: 1, num: 'السابع', text: 'الإقرارات والتعهدات' });
+  blocks.push({ type: 'subheading', text: `إقرارات ${ownerLabel}` });
+  blocks.push({ type: 'clause', num: '٧-١', text: `أنه المالك القانوني للعقار أو الوكيل المفوّض بصلاحية كاملة لإبرام هذا العقد.` });
+  blocks.push({ type: 'clause', num: '٧-٢', text: 'أن العقار خالٍ من الرهون أو الحجوزات أو الدعاوى التي قد تؤثر على التشغيل.' });
+  blocks.push({ type: 'clause', num: '٧-٣', text: 'أن العقار مطابق لاشتراطات السلامة والمواصفات المعتمدة من الجهات المختصة.' });
+  blocks.push({ type: 'clause', num: '٧-٤', text: 'أنه لم يبرم أي عقد ساري مع طرف ثالث يتعارض مع التزاماته في هذا العقد.' });
+  blocks.push({ type: 'clause', num: '٧-٥', text: 'الالتزام بأنظمة مكافحة غسل الأموال وتمويل الإرهاب.' });
+  blocks.push({ type: 'subheading', text: 'إقرارات المدير' });
+  blocks.push({ type: 'clause', num: '٧-٦', text: 'أنه شركة مرخصة قانوناً ومسجلة لدى الجهات المختصة.' });
+  blocks.push({ type: 'clause', num: '٧-٧', text: 'الالتزام ببذل الجهد المهني المعقول لتحقيق أفضل عائد.' });
+  blocks.push({ type: 'clause', num: '٧-٨', text: 'حماية بيانات العقار والمالك والضيوف وفق نظام حماية البيانات الشخصية السعودي.' });
+
+  // Chapter 8: Fees
+  blocks.push({ type: 'heading', level: 1, num: 'الثامن', text: 'الرسوم وآلية احتساب الإيرادات' });
+  blocks.push({ type: 'clause', num: '٨-١', text: `يستحق المدير نسبة (${s.financial.mgmtFee}%) من صافي إيرادات الإيجار عن كل حجز، مقابلاً شاملاً لخدمات الإدارة.` });
+  blocks.push({ type: 'clause', num: '٨-٢', text: 'يتم احتساب النسبة على صافي إيرادات الإيجار بعد خصم رسوم المنصة وضريبة القيمة المضافة المحصّلة منها.' });
+  blocks.push({ type: 'clause', num: '٨-٣', text: `تخضع رسوم الإدارة لضريبة القيمة المضافة وفق النسبة السارية، ويتحملها ${ownerLabel}.` });
+  blocks.push({ type: 'clause', num: '٨-٤', text: 'تُستثنى تعويضات AirCover من صافي الإيرادات ولا تدخل في احتساب الرسوم.' });
+  blocks.push({ type: 'clause', num: '٨-٥', text: 'تؤول للمدير حصراً إيرادات الخدمات الإضافية للضيوف (نقل، توصيل، حزم سياحية).' });
+  blocks.push({ type: 'clause', num: '٨-٦', text: `يُرفق المدير مع كل تحويل كشفاً ${freqLabel.includes('شهري') ? 'شهرياً' : `لـ${period}`} يبيّن إجمالي الحجوزات وخصومات المنصة والمصروفات وصافي المبلغ المحوّل ومعدل الإشغال.` });
+  blocks.push({ type: 'clause', num: '٨-٧', text: `يحقّ لـ${ownerLabel} الاعتراض خلال (15) يوماً، وبعدها يعتمد الكشف نهائياً.` });
+
+  // Chapter 9: Payment Terms
+  blocks.push({ type: 'heading', level: 1, num: 'التاسع', text: 'شروط الدفع والتحويلات' });
+  if (s.currency === 'sar') {
+    blocks.push({ type: 'clause', num: '٩-١', text: `يُحوّل نصيب ${ownerLabel} بالريال السعودي إلى حسابه المحلي المبيّن في صدر العقد، في موعد أقصاه اليوم الخامس عشر من ${period} التالي.` });
+    blocks.push({ type: 'clause', num: '٩-٢', text: `يتم احتساب التحويل من الدولار الأمريكي إلى الريال السعودي بمعدل صرف ثابت قدره (${s.exchangeRate}) ريال لكل دولار، وهو المعدل القياسي المعتمد لدى البنوك السعودية.` });
+    blocks.push({ type: 'clause', num: '٩-٣', text: 'لا يتحمّل المدير أي مسؤولية عن تذبذب أسعار الصرف الفعلية أو الفروقات الناتجة عنها بعد التحويل.' });
+  } else {
+    blocks.push({ type: 'clause', num: '٩-١', text: `يُحوّل نصيب ${ownerLabel} بالدولار الأمريكي مباشرةً إلى حسابه الدولاري لدى البنك الأهلي السعودي (SNB) المبيّن في صدر العقد، في موعد أقصاه اليوم الخامس عشر من ${period} التالي.` });
+    blocks.push({ type: 'clause', num: '٩-٢', text: `يتحمّل ${ownerLabel} كامل المسؤولية والكلفة عن تحويل العملة وفروق أسعار الصرف والرسوم المصرفية، ولا يتحمّل المدير أي خسارة ناشئة عن إخفاق ${ownerLabel} في الحفاظ على حساب دولاري فعّال.` });
+  }
+  blocks.push({ type: 'clause', num: '٩-٤', text: `يلتزم ${ownerLabel} بإشعار المدير كتابةً بأي تغيير في بيانات الحساب البنكي قبل (10) أيام عمل من موعد التحويل التالي.` });
+  blocks.push({ type: 'clause', num: '٩-٥', text: `في حال إخلال ${ownerLabel} بأي التزام مالي، يحقّ للمدير الخصم من تحويلات الإيرادات.` });
+  blocks.push({ type: 'clause', num: '٩-٦', text: 'تُعتبر التحويلات نهائية بمجرد إرسالها من حساب المدير، ولا يتحمّل أي تأخير ناجم عن البنوك الوسيطة.' });
+
+  // Chapter 10: Cleaning
+  blocks.push({ type: 'heading', level: 1, num: 'العاشر', text: 'رسوم التنظيف والتجهيز' });
+  const totalCleaning = props.reduce((sum, p) => sum + Number(p.cleaningFee || 0), 0);
+  blocks.push({ type: 'clause', num: '١٠-١', text: `يلتزم ${ownerLabel} بدفع رسوم تنظيف ${freqLabel.includes('شهري') ? 'شهرية' : freqLabel} ${isMultiProp ? `للعقارات المبيّنة في الجدول التمهيدي بقيمة إجمالية قدرها (${fmtMoney(totalCleaning)}) ريال` : `قدرها (${fmtMoney(props[0]?.cleaningFee || 1000)}) ريال`}، تشمل التنظيف الدوري واستلام ومغادرة الضيوف وتجديد مستلزمات الضيافة.` });
+  blocks.push({ type: 'clause', num: '١٠-٢', text: `قد تتفاوت هذه الرسوم بنسبة لا تتجاوز (${s.financial.cleaningVar}%) زيادةً أو نقصاناً، بحسب شركة التنظيف وطبيعة الخدمات، مع إشعار ${ownerLabel} قبل (30) يوماً من أي تعديل دائم.` });
+  blocks.push({ type: 'clause', num: '١٠-٣', text: 'يحقّ للمدير إجراء تنظيف عميق دوري كل (3) أشهر تُحتسب كلفته من رسوم التنظيف، ما لم تستلزم تكلفة إضافية يتم الاتفاق عليها كتابة.' });
+
+  // Chapter 11: Additional Services
+  blocks.push({ type: 'heading', level: 1, num: 'الحادي عشر', text: 'الخدمات الإضافية' });
+  blocks.push({ type: 'clause', num: '١١-١', text: 'تُعتبر الخدمات الإضافية للضيوف (النقل، التوصيل، حزم المناسبات، الخدمات السياحية) دخلاً حصرياً للمدير لا يُشارك.' });
+  blocks.push({ type: 'clause', num: '١١-٢', text: 'يضمن المدير ألا تؤثر هذه الخدمات على جودة العقار أو سلامة الضيوف، ويتحمّل وحده مسؤوليتها.' });
+
+  // Chapter 12: Maintenance
+  blocks.push({ type: 'heading', level: 1, num: 'الثاني عشر', text: 'الصيانة والإصلاحات' });
+  blocks.push({ type: 'clause', num: '١٢-١', text: `يحقّ للمدير صرف ما يصل إلى (${fmtMoney(s.financial.maintFloat)}) ريال ${freqLabel.includes('شهري') ? 'شهرياً' : `كل ${period}`} لأغراض الصيانة الاعتيادية أو التنظيف العميق دون الرجوع لـ${ownerLabel}، على أن يُبلّغ عن هذه المصاريف في كشف الأداء.` });
+  blocks.push({ type: 'clause', num: '١٢-٢', text: 'بشأن أي إصلاح جوهري:' });
+  blocks.push({ type: 'bullets', items: [
+    `إشعار ${ownerLabel} كتابةً بتقدير الكلفة المتوقعة.`,
+    `انتظار الموافقة الكتابية، إلا في حالات الطوارئ.`,
+    'الحصول على عرضي سعر للإصلاحات التي تتجاوز (5,000) ريال.',
+  ]});
+  blocks.push({ type: 'clause', num: '١٢-٣', text: `يموّل ${ownerLabel} جميع الإصلاحات الجوهرية، ويجوز للمدير تسبيق التكلفة في الطوارئ على أن يُسترد من أول تحويل لاحق.` });
+  blocks.push({ type: 'clause', num: '١٢-٤', text: 'يُجري المدير فحصاً شاملاً للعقار كل (3) أشهر ويعد تقريراً بحالته.' });
+  blocks.push({ type: 'clause', num: '١٢-٥', text: `إذا تأخر ${ownerLabel} في تمويل إصلاح ضروري لأكثر من (10) أيام عمل، يحقّ للمدير: (أ) تعليق الحجوزات؛ (ب) تنفيذ الإصلاح وخصم تكلفته من الإيرادات؛ (ج) فسخ العقد إذا أثّر التأخر جوهرياً.` });
+
+  // Chapter 13: Insurance & Liability
+  blocks.push({ type: 'heading', level: 1, num: 'الثالث عشر', text: 'التأمين وحدود المسؤولية' });
+  blocks.push({ type: 'clause', num: '١٣-١', text: 'تعالَج أضرار الضيوف أولاً عبر برنامج AirCover وفق شروطه السارية.' });
+  blocks.push({ type: 'clause', num: '١٣-٢', text: 'AirCover برنامج تابع لطرف ثالث، تغطيته غير مضمونة.' });
+  blocks.push({ type: 'clause', num: '١٣-٣', text: `الأثاث المملوك لـ${ownerLabel} تحت مسؤوليته، ويستحق (100%) من أي تعويض من AirCover يخصّه.` });
+  blocks.push({ type: 'clause', num: '١٣-٤', text: `لا تتجاوز مسؤولية المدير الإجمالية ما يعادل إجمالي رسوم الإدارة المستحقة خلال الأشهر الستة (6) السابقة على المطالبة، باستثناء حالات الغش أو الإهمال الجسيم.` });
+  blocks.push({ type: 'clause', num: '١٣-٥', text: 'لا يكون المدير في أي حال مسؤولاً عن الأضرار غير المباشرة أو فوات الكسب أو فقدان السمعة.' });
+  blocks.push({ type: 'clause', num: '١٣-٦', text: `يتعهد ${ownerLabel} بتعويض المدير من أي مطالبات تنشأ عن: عيوب العقار، مخالفة الأنظمة، عدم سلامة الأثاث، أو ادعاءات أطراف ثالثة.` });
+  blocks.push({ type: 'clause', num: '١٣-٧', text: `يلتزم ${ownerLabel} بتأمين شامل ساري المفعول بحدٍ أدنى (${fmtMoney(s.financial.insMin)}) ريال.` });
+
+  // Chapter 14: No Income Guarantee
+  blocks.push({ type: 'heading', level: 1, num: 'الرابع عشر', text: 'عدم ضمان الدخل' });
+  blocks.push({ type: 'clause', num: '١٤-١', text: `لا يضمن المدير أي نسبة إشغال أو مستوى دخل محدد، ويُقرّ ${ownerLabel} بأن العائد يتأثر بعوامل خارجة عن إرادة المدير.` });
+  blocks.push({ type: 'clause', num: '١٤-٢', text: 'يلتزم المدير ببذل جهود تجارية معقولة لتعظيم الإيرادات.' });
+  blocks.push({ type: 'clause', num: '١٤-٣', text: 'أي توقعات سابقة تُعتبر استرشادية ولا تُشكّل التزاماً.' });
+
+  // Chapter 15: Force Majeure
+  blocks.push({ type: 'heading', level: 1, num: 'الخامس عشر', text: 'القوة القاهرة' });
+  blocks.push({ type: 'clause', num: '١٥-١', text: 'لا يكون أي طرف مسؤولاً عن إخفاقه في تنفيذ التزاماته إذا كان ذلك راجعاً إلى قوة قاهرة.' });
+  blocks.push({ type: 'clause', num: '١٥-٢', text: 'يلتزم الطرف المتأثر بإشعار الطرف الآخر كتابةً خلال (7) أيام من تاريخ علمه بالحدث.' });
+  blocks.push({ type: 'clause', num: '١٥-٣', text: 'تُعلّق الالتزامات المتأثرة بالقوة القاهرة دون أن يُعدّ ذلك إخلالاً، وتستمر الالتزامات غير المتأثرة.' });
+  blocks.push({ type: 'clause', num: '١٥-٤', text: 'إذا استمرت القوة القاهرة لأكثر من (90) يوماً، يحقّ لأي طرف فسخ العقد دون تعويض مع تسوية المستحقات.' });
+  blocks.push({ type: 'clause', num: '١٥-٥', text: 'لا تُعد الصعوبات المالية أو تذبذب السوق قوة قاهرة.' });
+
+  // Chapter 16: Suspension
+  blocks.push({ type: 'heading', level: 1, num: 'السادس عشر', text: 'تعليق التشغيل' });
+  blocks.push({ type: 'clause', num: '١٦-١', text: 'يجوز للمدير تعليق قبول الحجوزات الجديدة في الحالات التالية:' });
+  blocks.push({ type: 'bullets', items: [
+    'عدم استيفاء التصاريح.',
+    'وجود خطر على السلامة.',
+    'صدور أمر من جهة مختصة.',
+    `إخلال ${ownerLabel} بالتزاماته الجوهرية.`,
+    'الحاجة إلى إصلاحات تستلزم إخلاء العقار.',
+  ]});
+  blocks.push({ type: 'clause', num: '١٦-٢', text: 'لا يتحمّل المدير مسؤولية خسارة الإيرادات خلال فترة التعليق المشروع.' });
+
+  // Chapter 17: Owner Use
+  blocks.push({ type: 'heading', level: 1, num: 'السابع عشر', text: `استخدام ${ownerLabel} للعقار` });
+  blocks.push({ type: 'clause', num: '١٧-١', text: `يجوز لـ${ownerLabel} استخدام العقار شخصياً في الفترات الخالية من الحجوزات المؤكدة فقط، بإشعار مسبق عبر Hostaway قبل (${ar(s.durations.personalUseNotice)}) يوماً.` });
+  blocks.push({ type: 'clause', num: '١٧-٢', text: `لا يجوز إلغاء حجز مؤكد لأغراض الاستخدام الشخصي، ويتحمّل ${ownerLabel} كافة التبعات في حال الإصرار.` });
+  blocks.push({ type: 'clause', num: '١٧-٣', text: `يتحمّل ${ownerLabel} تكاليف التنظيف العميق بعد الاستخدام الشخصي بحد أقصى (1,500) ريال للمرة.` });
+  blocks.push({ type: 'clause', num: '١٧-٤', text: `الحد الأقصى للاستخدام الشخصي (${ar(s.durations.personalUseDays)}) يوماً في السنة، ما لم يُتفق كتابةً على غير ذلك.` });
+
+  // Chapter 18: Handover
+  blocks.push({ type: 'heading', level: 1, num: 'الثامن عشر', text: 'التسليم والاستلام' });
+  blocks.push({ type: 'clause', num: '١٨-١', text: 'عند البدء، يُجري الطرفان جرداً مشتركاً موثقاً ويوقّعان تقرير حالة العقار.' });
+  blocks.push({ type: 'clause', num: '١٨-٢', text: 'يُرفق بتقرير الحالة صور ومقاطع موثقة بالتاريخ والوقت.' });
+  blocks.push({ type: 'clause', num: '١٨-٣', text: 'عند الانتهاء، يُسلَّم العقار بالحالة الموثقة مع مراعاة الاستهلاك الطبيعي.' });
+  blocks.push({ type: 'clause', num: '١٨-٤', text: 'يتحمّل المدير كلفة إصلاح أي تلف يقع بفعله أو موظفيه (دون فعل الضيوف).' });
+
+  // Chapter 19: Confidentiality
+  blocks.push({ type: 'heading', level: 1, num: 'التاسع عشر', text: 'السرية وحماية البيانات' });
+  blocks.push({ type: 'clause', num: '١٩-١', text: 'يلتزم كل طرف بسرية معلومات الطرف الآخر وعدم استخدامها خارج نطاق تنفيذ العقد.' });
+  blocks.push({ type: 'clause', num: '١٩-٢', text: `تمتد التزامات السرية طوال العقد ولمدة (${ar(s.durations.confYears)}) سنتين بعد انتهائه.` });
+  blocks.push({ type: 'clause', num: '١٩-٣', text: 'يلتزم المدير بمعالجة بيانات الضيوف وفق نظام حماية البيانات الشخصية السعودي.' });
+  blocks.push({ type: 'clause', num: '١٩-٤', text: `في حال الإخلال بالسرية، يستحق الطرف المضرور شرطاً جزائياً قدره (${fmtMoney(s.penalties.conf)}) ريال عن كل واقعة، دون الإخلال بحقّ التعويض عن الأضرار الفعلية.` });
+
+  // Chapter 20: IP
+  blocks.push({ type: 'heading', level: 1, num: 'العشرون', text: 'الملكية الفكرية' });
+  blocks.push({ type: 'clause', num: '٢٠-١', text: 'تكون جميع الصور والمحتوى التسويقي الذي ينتجه المدير ملكاً فكرياً حصرياً له.' });
+  blocks.push({ type: 'clause', num: '٢٠-٢', text: 'ملفات الإيرادات والبيانات التشغيلية وقوائم الضيوف ملك حصري للمدير.' });
+  blocks.push({ type: 'clause', num: '٢٠-٣', text: 'علامة «عوجا سكن» وشعارها ملك حصري للمدير ولا يجوز استخدامها بعد انتهاء العقد.' });
+  blocks.push({ type: 'clause', num: '٢٠-٤', text: `بعد انتهاء العقد، يلتزم ${ownerLabel} بحذف أي محتوى محمي بحقوق ملكية المدير، تحت طائلة شرط جزائي قدره (${fmtMoney(s.penalties.ip)}) ريال.` });
+
+  // Chapter 21: Non-Solicitation
+  blocks.push({ type: 'heading', level: 1, num: 'الحادي والعشرون', text: 'عدم الاستقطاب وعدم المنافسة' });
+  blocks.push({ type: 'clause', num: '٢١-١', text: `خلال مدة العقد ولمدة (${ar(s.durations.ncMonths)}) شهراً بعد انتهائه، يحظر على ${ownerLabel}:` });
+  blocks.push({ type: 'bullets', items: [
+    'استقطاب أو توظيف موظفي المدير الذين شاركوا في إدارة العقار.',
+    'التواصل المباشر مع ضيوف المدير لتأجير العقار خارج العقد.',
+    'استخدام إستراتيجيات التسعير أو الممارسات التشغيلية لمنافسة المدير.',
+  ]});
+  blocks.push({ type: 'clause', num: '٢١-٢', text: `في حال الإخلال، يستحق المدير شرطاً جزائياً قدره (${fmtMoney(s.penalties.sol)}) ريال عن كل واقعة، دون الإخلال بحقّ التعويض عن الأضرار الفعلية والمطالبة بأمر قضائي بوقف المخالفة.` });
+
+  // Chapter 22: Penalty Clauses Table
+  blocks.push({ type: 'heading', level: 1, num: 'الثاني والعشرون', text: 'الشروط الجزائية' });
+  blocks.push({ type: 'p', text: '٢٢-١  اتفق الطرفان وفقاً لأحكام المواد (178) و(179) و(180) من نظام المعاملات المدنية على الشروط الجزائية التالية، التي تمثل تعويضاً اتفاقياً معقولاً عن الأضرار المتوقعة:' });
+  blocks.push({ type: 'penaltyTable', list: [
+    { type: 'إخلال الحصرية', amount: `${fmtMoney(s.penalties.excl)} ر.س لكل واقعة`, ref: '٣-٢' },
+    { type: 'إخلال السرية', amount: `${fmtMoney(s.penalties.conf)} ر.س لكل واقعة`, ref: '١٩-٤' },
+    { type: 'استقطاب الموظفين / المنافسة', amount: `${fmtMoney(s.penalties.sol)} ر.س لكل واقعة`, ref: '٢١-٢' },
+    { type: 'إنهاء غير مشروع قبل انتهاء المدة', amount: `ما يعادل متوسط رسوم الإدارة لـ (${ar(s.penalties.earlyMonths)}) أشهر`, ref: '٢٥-٢' },
+    { type: 'استخدام يتعارض مع حجز قائم', amount: `قيمة الحجز + ${fmtMoney(s.penalties.useExtra)} ر.س`, ref: '١٧-٢' },
+    { type: 'استخدام المحتوى الفكري بعد العقد', amount: `${fmtMoney(s.penalties.ip)} ر.س لكل واقعة`, ref: '٢٠-٤' },
+  ]});
+  blocks.push({ type: 'clause', num: '٢٢-٢', text: 'تستحق الشروط الجزائية بمجرد وقوع الإخلال، دون الحاجة إلى إثبات ضرر فعلي.' });
+  blocks.push({ type: 'clause', num: '٢٢-٣', text: 'لا يخلّ ذلك بحقّ الطرف المضرور في المطالبة بالتعويض الكامل إن جاوزت الأضرار الفعلية قيمة الشرط الجزائي، شريطة الإثبات.' });
+  blocks.push({ type: 'clause', num: '٢٢-٤', text: 'يقرّ الطرفان بأن مبالغ الشروط الجزائية تمثل تقديراً معقولاً ومتناسباً للأضرار المتوقعة، وأنها ليست عقوبة بل تعويضاً مدنياً اتفاقياً.' });
+  blocks.push({ type: 'clause', num: '٢٢-٥', text: 'إذا تبيّن للمحكمة أن الشرط الجزائي يفوق الضرر فوقاً ظاهراً، يحقّ لها تخفيضه وفق سلطتها التقديرية بموجب نظام المعاملات المدنية.' });
+
+  // Chapter 23: Notices
+  blocks.push({ type: 'heading', level: 1, num: 'الثالث والعشرون', text: 'الإشعارات' });
+  blocks.push({ type: 'clause', num: '٢٣-١', text: 'تكون جميع الإشعارات والمراسلات مكتوبةً وموثقة.' });
+  blocks.push({ type: 'clause', num: '٢٣-٢', text: 'تُعتبر الوسائل التالية صحيحة:' });
+  blocks.push({ type: 'bullets', items: [
+    'البريد الإلكتروني المسجّل (مستلَم بعد 24 ساعة).',
+    'البريد المسجّل بعلم الوصول.',
+    'التسليم باليد مع توقيع المستلم.',
+    'نظام Hostaway للأمور التشغيلية.',
+  ]});
+  blocks.push({ type: 'clause', num: '٢٣-٣', text: 'العناوين المسجّلة في صدر العقد هي العناوين المعتمدة، ولا يُحتجّ بأي إشعار لعنوان آخر إلا بعد إخطار كتابي بالتغيير قبل (5) أيام.' });
+
+  // Chapter 24: Assignment
+  blocks.push({ type: 'heading', level: 1, num: 'الرابع والعشرون', text: 'التنازل والإحالة' });
+  blocks.push({ type: 'clause', num: '٢٤-١', text: `لا يجوز لـ${ownerLabel} التنازل عن العقد أو إحالته إلا بموافقة كتابية مسبقة من المدير.` });
+  blocks.push({ type: 'clause', num: '٢٤-٢', text: 'يجوز للمدير الإحالة دون موافقة إلى شركة تابعة أو خلف قانوني أو مشترٍ للنشاط.' });
+  blocks.push({ type: 'clause', num: '٢٤-٣', text: 'في حال انتقال ملكية العقار إلى الورثة، يستمر العقد سارياً ما لم يطلبوا إنهاءه بإشعار خلال (60) يوماً.' });
+
+  // Chapter 25: Termination
+  blocks.push({ type: 'heading', level: 1, num: 'الخامس والعشرون', text: 'الإنهاء والتسوية' });
+  blocks.push({ type: 'clause', num: '٢٥-١', text: `الإنهاء بعدم التجديد: بإشعار كتابي قبل (${ar(s.durations.renewNotice)}) يوماً من انتهاء المدة.` });
+  blocks.push({ type: 'clause', num: '٢٥-٢', text: `الإنهاء الاختياري المبكر: بإشعار (${ar(s.durations.voluntaryNotice)}) يوماً، مع التزام الطرف المُنهي دون سبب مشروع بدفع الشرط الجزائي المنصوص عليه في البند (22-1).` });
+  blocks.push({ type: 'clause', num: '٢٥-٣', text: 'الإنهاء الفوري للسبب المشروع:' });
+  blocks.push({ type: 'bullets', items: [
+    'الإخلال الجوهري وعدم تداركه خلال (15) يوماً.',
+    'الإعسار أو الإفلاس أو دخول الطرف في تصفية.',
+    'الغش أو الاحتيال أو الإهمال الجسيم.',
+    'صدور حكم قضائي نهائي يمنع التنفيذ.',
+  ]});
+  blocks.push({ type: 'clause', num: '٢٥-٤', text: `الإنهاء الفوري لـ${ownerLabel}: إذا كان سجل الحجوزات خالياً تماماً من حجوزات مؤكدة لمدة (${ar(s.durations.zeroBookings)}) يوماً متواصلاً.` });
+  blocks.push({ type: 'clause', num: '٢٥-٥', text: 'التسوية النهائية: خلال (15) يوماً من الإنهاء، يلتزم المدير بـ:' });
+  blocks.push({ type: 'bullets', items: [
+    'تسليم العقار بالحالة المنصوص عليها.',
+    'تقديم كشف تسوية نهائي.',
+    'إعادة المفاتيح وأجهزة الوصول.',
+    'تحويل صافي الإيرادات المستحقة بعد خصم الرسوم.',
+  ]});
+  blocks.push({ type: 'clause', num: '٢٥-٦', text: 'تظل الحجوزات المؤكدة قبل الإنهاء سارية ويستحق المدير رسوم الإدارة عنها.' });
+  blocks.push({ type: 'clause', num: '٢٥-٧', text: 'الالتزامات السارية بعد الإنهاء: السرية، الملكية الفكرية، عدم المنافسة، عدم الاستقطاب، الشروط الجزائية، والتعويضات.' });
+
+  // Chapter 26: Governing Law
+  blocks.push({ type: 'heading', level: 1, num: 'السادس والعشرون', text: 'القانون الواجب التطبيق وتسوية النزاعات' });
+  blocks.push({ type: 'clause', num: '٢٦-١', text: 'تخضع هذه الاتفاقية لأنظمة المملكة العربية السعودية، خاصةً نظام المعاملات المدنية.' });
+  blocks.push({ type: 'clause', num: '٢٦-٢', text: 'يلتزم الطرفان بمحاولة التسوية الودية خلال (30) يوماً من الإشعار الكتابي.' });
+  blocks.push({ type: 'clause', num: '٢٦-٣', text: 'في حال تعذر التسوية، تُحال النزاعات إلى المحكمة التجارية المختصة في مدينة الرياض، أو إلى التحكيم عبر المركز السعودي للتحكيم التجاري (SCCA) باتفاق كتابي مشترك.' });
+
+  // Chapter 27: General
+  blocks.push({ type: 'heading', level: 1, num: 'السابع والعشرون', text: 'أحكام عامة' });
+  blocks.push({ type: 'clause', num: '٢٧-١', text: 'تحلّ هذه الاتفاقية محل كل الاتفاقيات السابقة فيما يخص موضوعها.' });
+  blocks.push({ type: 'clause', num: '٢٧-٢', text: 'يجب أن يكون أي تعديل خطياً وموقعاً من ممثلَين مفوّضَين.' });
+  blocks.push({ type: 'clause', num: '٢٧-٣', text: 'بطلان أي بند لا يؤثر على باقي البنود.' });
+  blocks.push({ type: 'clause', num: '٢٧-٤', text: 'النص العربي هو المعتمد قانوناً.' });
+  blocks.push({ type: 'clause', num: '٢٧-٥', text: 'يقرّ الطرفان بحجية التوقيع الإلكتروني وفق نظام التعاملات الإلكترونية.' });
+  blocks.push({ type: 'clause', num: '٢٧-٦', text: 'حُرّر العقد من ثلاث نسخ، يحتفظ كل طرف بنسخة.' });
+
+  // Custom clauses
+  if (s.customClauses.length) {
+    blocks.push({ type: 'heading', level: 1, num: 'الثامن والعشرون', text: 'أحكام إضافية' });
+    s.customClauses.forEach((cc, i) => {
+      if (cc.title) blocks.push({ type: 'subheading', text: cc.title });
+      if (cc.body) blocks.push({ type: 'clause', num: `٢٨-${ar(i + 1)}`, text: cc.body });
+    });
+  }
+
+  // Signatures
+  blocks.push({ type: 'signatures', owners: owners, manager: s.manager, isMulti: isMulti });
+
+  // ====== Post-process: assign stable IDs and apply overrides ======
+  let lastClauseNum = '';
+  let preambleP = 0, preambleCB = 0, subhCount = 0;
+  blocks.forEach(b => {
+    if (b.type === 'clause') {
+      lastClauseNum = b.num;
+      b.id = 'clause-' + b.num;
+      b.label = 'البند ' + b.num;
+    } else if (b.type === 'bullets') {
+      b.items = b.items.map((it, idx) => {
+        const text = typeof it === 'string' ? it : it.text;
+        const id = 'bullet-' + (lastClauseNum || 'pre') + '-' + idx;
+        const override = s.overrides[id];
+        return { text: override || text, id, modified: !!override, default: text, label: 'نقطة (' + (lastClauseNum || 'تمهيد') + ')' };
+      });
+    } else if (b.type === 'definitions') {
+      b.list = b.list.map(([t, d]) => {
+        const id = 'def-' + t.replace(/\s+/g, '_');
+        const override = s.overrides[id];
+        return { term: t, def: override || d, id, modified: !!override, default: d, label: 'تعريف: ' + t };
+      });
+    } else if (b.type === 'p') {
+      b.id = 'p-' + (preambleP++);
+      b.label = 'فقرة';
+    } else if (b.type === 'centerBold') {
+      b.id = 'cb-' + (preambleCB++);
+      b.label = 'عبارة مركزية';
+    } else if (b.type === 'subheading') {
+      b.id = 'subh-' + (subhCount++);
+      b.label = 'عنوان فرعي: ' + b.text;
+    }
+    // Apply override
+    if (b.id && s.overrides[b.id]) {
+      b.defaultText = b.text;
+      b.text = s.overrides[b.id];
+      b.modified = true;
+    }
+  });
+
+  // ====== Filter out deleted blocks/items ======
+  blocks = blocks.filter(b => !(b.id && s.deleted[b.id]));
+  blocks.forEach(b => {
+    if (b.type === 'bullets') {
+      b.items = b.items.filter(it => !s.deleted[it.id]);
+    }
+    if (b.type === 'definitions') {
+      b.list = b.list.filter(d => !s.deleted[d.id]);
+    }
+  });
+  // Remove empty container blocks
+  blocks = blocks.filter(b => {
+    if (b.type === 'bullets' && b.items.length === 0) return false;
+    if (b.type === 'definitions' && b.list.length === 0) return false;
+    return true;
+  });
+
+  return blocks;
+}
+
+// ===================== HTML PREVIEW RENDERER =====================
+function renderPreview() {
+  const blocks = buildContract();
+  const overrideCount = Object.keys(state.overrides).length;
+  const deletedCount = Object.keys(state.deleted).length;
+  const esc = s => (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  const hint = `<div class="edit-hint">
+    💡 <b>نصيحة:</b> انقر على نص أي بند لتعديله، أو اضغط 🗑 لحذفه. اضغط ESC للإلغاء.
+    ${overrideCount > 0 ? `<br>📝 عدد البنود المعدّلة: <b>${overrideCount}</b>` : ''}
+  </div>`;
+
+  let deletedPanel = '';
+  if (deletedCount > 0) {
+    const deletedItems = Object.entries(state.deleted).map(([id, info]) => `
+      <div class="deleted-item">
+        <div class="deleted-item-text"><b>${esc(info.label)}:</b> ${esc((info.text || '').substring(0, 120))}${info.text && info.text.length > 120 ? '…' : ''}</div>
+        <button class="deleted-restore" data-restore-id="${id}">↺ استعادة</button>
+      </div>
+    `).join('');
+    deletedPanel = `<div class="deleted-panel ${state.deletedPanelOpen ? '' : 'collapsed'}" id="deletedPanel">
+      <div class="deleted-panel-header" onclick="toggleDeletedPanel()">
+        <span>🗑 العناصر المحذوفة (${deletedCount})</span>
+        <span style="font-size:13px;font-weight:400">${state.deletedPanelOpen ? 'إخفاء ▴' : 'عرض ▾'}</span>
+      </div>
+      <div class="deleted-panel-body">
+        ${deletedItems}
+        <div style="text-align:left;margin-top:10px">
+          <button class="deleted-restore" style="background:var(--primary)" onclick="restoreAllDeleted()">↺ استعادة جميع المحذوفات</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  const html = hint + deletedPanel + blocks.map(renderBlock).join('');
+  document.getElementById('preview').innerHTML = html;
+}
+
+function toggleDeletedPanel() {
+  state.deletedPanelOpen = !state.deletedPanelOpen;
+  updatePreview();
+}
+
+// Global helper: inline editable text (used everywhere)
+function escHTML(s) { return (s || '').toString().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+function inlineEdit(id, defaultText, opts = {}) {
+  const override = state.overrides[id];
+  const text = override !== undefined ? override : defaultText;
+  const modified = override !== undefined;
+  const cls = 'editable editable-text' + (modified ? ' modified' : '');
+  const resetBtn = modified ? `<button class="reset-clause" data-reset-id="${id}" title="استعادة">↺</button>` : '';
+  const allowDelete = opts.deletable !== false;
+  const label = opts.label || 'عنصر';
+  const delBtn = allowDelete ? `<button class="delete-clause" data-delete-id="${id}" data-delete-label="${escHTML(label)}" title="حذف">🗑</button>` : '';
+  return `${resetBtn}${delBtn}<span class="${cls}" data-edit-id="${id}">${escHTML(text)}</span>`;
+}
+
+function renderBlock(b) {
+  const esc = escHTML;
+  // Backwards-compat wrapper that uses block.id and block.modified
+  const editable = (id, text, modified, label) => {
+    const cls = 'editable editable-text' + (modified ? ' modified' : '');
+    const resetBtn = modified ? `<button class="reset-clause" data-reset-id="${id}" title="استعادة النص الأصلي">↺</button>` : '';
+    const delBtn = `<button class="delete-clause" data-delete-id="${id}" data-delete-label="${esc(label || 'بند')}" title="حذف هذا البند">🗑</button>`;
+    return `${resetBtn}${delBtn}<span class="${cls}" data-edit-id="${id}">${esc(text)}</span>`;
+  };
+
+  switch (b.type) {
+    case 'cover':
+      return `<div class="cover">
+        <h1 style="text-align:center;margin-top:20px">${inlineEdit('cover-brand-ar', 'شركة عوجا سكن لإدارة الأملاك', {label:'اسم الشركة (عربي)', deletable:false})}</h1>
+        <p style="text-align:center;color:#666;font-size:12px">${inlineEdit('cover-brand-en', 'OUJA RESIDENCE PROPERTY MANAGEMENT CO.', {label:'اسم الشركة (إنجليزي)'})}</p>
+        <p style="text-align:center;color:#666">${inlineEdit('cover-reg-line', `السجل الوطني الموحد ٧٠٥٠١٥٨٨١٠ — ${b.city}، المملكة العربية السعودية`, {label:'سطر السجل والعنوان'})}</p>
+        <hr style="border:0;border-top:2px solid var(--primary);margin:30px 0">
+        <div class="cover-title">${inlineEdit('cover-title-ar', 'عقد إدارة وتشغيل وحدة عقارية', {label:'عنوان العقد الرئيسي', deletable:false})}</div>
+        <div class="cover-sub">${inlineEdit('cover-subtitle-ar', 'بنظام التأجير اليومي / الأسبوعي / الشهري', {label:'العنوان الفرعي'})}</div>
+        <p style="text-align:center;color:#888;font-size:11px;margin-top:8px">${inlineEdit('cover-title-en', 'HOLIDAY HOMES MANAGEMENT AGREEMENT', {label:'العنوان (إنجليزي)'})}</p>
+        <table>
+          <tr><td class="label">${inlineEdit('cover-lbl-date', 'تاريخ التحرير', {label:'تسمية: تاريخ التحرير', deletable:false})}</td><td>${esc(b.date)}م</td></tr>
+          <tr><td class="label">${inlineEdit('cover-lbl-place', 'مكان التحرير', {label:'تسمية: مكان التحرير', deletable:false})}</td><td>${esc(b.city)}${inlineEdit('cover-place-suffix', '، المملكة العربية السعودية', {label:'لاحقة المكان'})}</td></tr>
+          <tr><td class="label">${inlineEdit('cover-lbl-fee', 'نسبة الإدارة', {label:'تسمية: نسبة الإدارة', deletable:false})}</td><td><b>${b.mgmtFee}%</b> ${inlineEdit('cover-fee-suffix', 'من صافي إيرادات الإيجار', {label:'لاحقة الإدارة'})}</td></tr>
+          <tr><td class="label">${inlineEdit('cover-lbl-term', 'مدة العقد', {label:'تسمية: مدة العقد', deletable:false})}</td><td>${ar(b.months)} ${inlineEdit('cover-term-suffix', 'شهراً ميلادياً قابل للتجديد التلقائي', {label:'لاحقة المدة'})}</td></tr>
+        </table>
+        <p class="page-break"></p>
+      </div>`;
+    case 'heading':
+      return `<h2>${inlineEdit('heading-prefix-'+b.num, 'الفصل '+b.num+': ', {label:'بادئة الفصل '+b.num, deletable:false})}${inlineEdit('heading-title-'+b.num, b.text, {label:'عنوان الفصل '+b.num})}</h2>`;
+    case 'subheading':
+      return `<h3>${editable(b.id, b.text, b.modified, b.label)}</h3>`;
+    case 'p':
+      return `<p>${editable(b.id, b.text, b.modified, b.label)}</p>`;
+    case 'centerBold':
+      return `<p style="text-align:center;font-weight:700;color:var(--primary);margin:14px 0">${editable(b.id, b.text, b.modified, b.label)}</p>`;
+    case 'clause':
+      return `<p><span class="clause-num">${esc(b.num)}</span> ${editable(b.id, b.text, b.modified, b.label)}</p>`;
+    case 'bullets':
+      return b.items.map(it => `<div class="bullet">${editable(it.id, it.text, it.modified, it.label)}</div>`).join('');
+    case 'definitions':
+      return b.list.map(d => `<div class="definition"><b>«${esc(d.term)}»:</b> ${editable(d.id, d.def, d.modified, d.label)}</div>`).join('');
+    case 'partyBox':
+      return renderPartyBox(b);
+    case 'propertyTable':
+      return renderPropertyTable(b.properties);
+    case 'penaltyTable':
+      return renderPenaltyTable(b.list);
+    case 'signatures':
+      return renderSignatures(b);
+    default:
+      return '';
+  }
+}
+
+function renderPartyBox(b) {
+  const p = b.party;
+  const isOwner = b.kind === 'owner';
+  const keyPrefix = isOwner ? 'owner-lbl-' : 'mgr-lbl-';
+  const rows = isOwner ? [
+    ['name', 'الاسم الكامل', p.name],
+    ['id', 'رقم الهوية / الإقامة', p.id],
+    ['nat', 'الجنسية', p.nationality],
+    ['phone', 'رقم الجوال', p.phone],
+    ['email', 'البريد الإلكتروني', p.email],
+    ['addr', 'العنوان الوطني', p.address],
+    ['ibSar', 'الآيبان (ريال سعودي)', p.ibanSar],
+    ['ibUsd', 'الحساب الدولاري (SNB)', p.ibanUsd],
+    ['cap', 'الصفة', p.capacity + (p.agencyNo ? ` (رقم الوكالة: ${p.agencyNo})` : '')],
+    ...(b.showPercent ? [['pct', 'نسبة الملكية', (p.percent || 0) + '%']] : []),
+  ] : [
+    ['cname', 'الاسم التجاري', p.name],
+    ['creg', 'السجل الوطني الموحد', p.reg],
+    ['caddr', 'المركز الرئيسي', p.address],
+    ['crep', 'الممثل القانوني', p.rep + ' — ' + p.repTitle],
+    ['cphone', 'الهاتف', p.phone],
+    ['cemail', 'البريد الإلكتروني', p.email],
+  ];
+  return `<h3 style="background:var(--light-bg);padding:6px 10px;color:var(--primary);margin-top:14px">${inlineEdit('partybox-title-' + (isOwner ? ('o'+(b.idx||0)) : 'm'), b.title, {label:'عنوان قسم: '+b.title, deletable:false})}</h3>
+    <table>${rows.map(([k, lblText, v]) => `<tr><td class="label">${inlineEdit(keyPrefix+k, lblText, {label:'تسمية: '+lblText, deletable:false})}</td><td>${escHTML(v || '________________________')}</td></tr>`).join('')}</table>`;
+}
+
+function renderPropertyTable(props) {
+  const head = `<tr>
+    <th>${inlineEdit('prop-th-unit', 'الوحدة', {label:'عمود: الوحدة', deletable:false})}</th>
+    <th>${inlineEdit('prop-th-address', 'العنوان', {label:'عمود: العنوان', deletable:false})}</th>
+    <th>${inlineEdit('prop-th-type', 'النوع', {label:'عمود: النوع', deletable:false})}</th>
+    <th>${inlineEdit('prop-th-beds', 'الغرف', {label:'عمود: الغرف', deletable:false})}</th>
+    <th>${inlineEdit('prop-th-permit', 'التصريح', {label:'عمود: التصريح', deletable:false})}</th>
+    <th>${inlineEdit('prop-th-cleaning', 'التنظيف', {label:'عمود: التنظيف', deletable:false})}</th>
+  </tr>`;
+  const rows = props.map(p => `<tr><td><b>${escHTML(p.code || '-')}</b></td><td>${escHTML(p.address || '_______')}</td><td>${escHTML(p.type)}</td><td>${escHTML(p.beds)}</td><td>${escHTML(p.permit || '-')}</td><td><b>${fmtMoney(p.cleaningFee)} ر.س</b></td></tr>`).join('');
+  return `<table>${head}${rows}</table>`;
+}
+
+function renderPenaltyTable(list) {
+  const head = `<tr>
+    <th>${inlineEdit('pen-th-type', 'نوع الإخلال', {label:'عمود: نوع الإخلال', deletable:false})}</th>
+    <th>${inlineEdit('pen-th-amount', 'الشرط الجزائي', {label:'عمود: الشرط الجزائي', deletable:false})}</th>
+    <th>${inlineEdit('pen-th-ref', 'المرجع', {label:'عمود: المرجع', deletable:false})}</th>
+  </tr>`;
+  const rows = list.map((p, i) => `<tr>
+    <td>${inlineEdit('pen-row-type-'+i, p.type, {label:'وصف إخلال #'+(i+1)})}</td>
+    <td><b>${inlineEdit('pen-row-amount-'+i, p.amount, {label:'مبلغ الشرط الجزائي #'+(i+1)})}</b></td>
+    <td style="text-align:center">${escHTML(p.ref)}</td>
+  </tr>`).join('');
+  return `<table>${head}${rows}</table>`;
+}
+
+function renderSignatures(b) {
+  const ownerSigs = b.owners.map((o, i) => {
+    const defaultLabel = b.isMulti ? 'المالك ' + ar(i + 1) : 'الطرف الأول — المالك';
+    return `
+    <div>
+      <div class="sig-header">${inlineEdit('sig-owner-label-'+i, defaultLabel, {label:'تسمية المالك '+(i+1), deletable:false})}</div>
+      <p><b>${inlineEdit('sig-lbl-name', 'الاسم:', {label:'تسمية الاسم', deletable:false})}</b> ${escHTML(o.name || '_______________________')}</p>
+      <p><b>${inlineEdit('sig-lbl-id', 'الهوية:', {label:'تسمية الهوية', deletable:false})}</b> ${escHTML(o.id || '_______________________')}</p>
+      <p style="margin-top:30px"><b>${inlineEdit('sig-lbl-signature', 'التوقيع:', {label:'تسمية التوقيع', deletable:false})}</b> _______________________</p>
+      <p><b>${inlineEdit('sig-lbl-date', 'التاريخ:', {label:'تسمية التاريخ', deletable:false})}</b> ____ / ____ / ____هـ</p>
+    </div>`;
+  }).join('');
+  const mgrSig = `
+    <div>
+      <div class="sig-header">${inlineEdit('sig-mgr-label', 'الطرف الثاني — المدير', {label:'تسمية المدير', deletable:false})}</div>
+      <p><b>${inlineEdit('sig-lbl-company', 'الشركة:', {label:'تسمية الشركة', deletable:false})}</b> ${escHTML(b.manager.name)}</p>
+      <p><b>${inlineEdit('sig-lbl-rep', 'الممثل:', {label:'تسمية الممثل', deletable:false})}</b> ${escHTML(b.manager.rep)}</p>
+      <p><b>${inlineEdit('sig-lbl-capacity', 'الصفة:', {label:'تسمية الصفة', deletable:false})}</b> ${escHTML(b.manager.repTitle)}</p>
+      <p style="margin-top:20px"><b>${inlineEdit('sig-lbl-signature-m', 'التوقيع:', {label:'تسمية التوقيع (مدير)', deletable:false})}</b> _______________________</p>
+      <p><b>${inlineEdit('sig-lbl-date-m', 'التاريخ:', {label:'تسمية التاريخ (مدير)', deletable:false})}</b> ____ / ____ / ____هـ</p>
+      <p><b>${inlineEdit('sig-stamp', 'الختم الرسمي للشركة', {label:'نص الختم'})}</b></p>
+    </div>`;
+  return `<h2 style="text-align:center;border:0;border-top:2px double var(--primary);border-bottom:2px double var(--primary);padding:8px 0;margin-top:30px">${inlineEdit('sig-title', 'إقرار وتوقيع الطرفَين', {label:'عنوان قسم التوقيع', deletable:false})}</h2>
+    <p>${inlineEdit('sig-ack', 'يقرّ كلٌ من الطرفَين بأنه قرأ كافة بنود هذا العقد بعناية، وفهم مضامينها فهماً تاماً، وأنه يبرمه عن رضاً واختيار.', {label:'نص الإقرار'})}</p>
+    <div class="signature-block">${ownerSigs}${mgrSig}</div>`;
+}
+
+function updatePreview() {
+  renderPreview();
+  setTimeout(attachInlineEdit, 0);
+}
+
+// ===================== INLINE EDITING =====================
+let editingOriginal = '';
+
+function attachInlineEdit() {
+  document.querySelectorAll('#preview .editable-text').forEach(el => {
+    if (el.dataset.bound) return;
+    el.dataset.bound = '1';
+    el.addEventListener('click', startEdit);
+  });
+  document.querySelectorAll('#preview .reset-clause').forEach(btn => {
+    if (btn.dataset.bound) return;
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = btn.dataset.resetId;
+      delete state.overrides[id];
+      updatePreview();
+      showToast('تم استعادة النص الأصلي ✓');
+    });
+  });
+  document.querySelectorAll('#preview .delete-clause').forEach(btn => {
+    if (btn.dataset.bound) return;
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = btn.dataset.deleteId;
+      const label = btn.dataset.deleteLabel || 'بند';
+      // capture original text from the sibling editable-text span
+      const textSpan = btn.parentElement.querySelector('.editable-text[data-edit-id="' + id + '"]');
+      const text = textSpan ? textSpan.textContent.trim() : '';
+      if (!confirm(`متأكد من حذف "${label}"؟\nيمكنك استعادته من لوحة "العناصر المحذوفة" في أعلى المعاينة.`)) return;
+      state.deleted[id] = { label, text };
+      state.deletedPanelOpen = true;
+      updatePreview();
+      showToast(`تم حذف ${label} ✓`);
+    });
+  });
+  document.querySelectorAll('#preview .deleted-restore[data-restore-id]').forEach(btn => {
+    if (btn.dataset.bound) return;
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = btn.dataset.restoreId;
+      delete state.deleted[id];
+      if (Object.keys(state.deleted).length === 0) state.deletedPanelOpen = false;
+      updatePreview();
+      showToast('تم استعادة البند ✓');
+    });
+  });
+}
+
+function restoreAllDeleted() {
+  const count = Object.keys(state.deleted).length;
+  if (count === 0) return;
+  if (!confirm(`متأكد من استعادة جميع البنود المحذوفة؟ (${count} عنصر)`)) return;
+  state.deleted = {};
+  state.deletedPanelOpen = false;
+  updatePreview();
+  showToast('تم استعادة جميع البنود ✓');
+}
+
+function startEdit(e) {
+  e.stopPropagation();
+  if (this.contentEditable === 'true') return;
+  editingOriginal = this.textContent;
+  this.contentEditable = 'true';
+  this.classList.add('editing');
+  this.focus();
+  // place cursor at end
+  const range = document.createRange();
+  range.selectNodeContents(this);
+  range.collapse(false);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  this.addEventListener('blur', saveEdit, { once: true });
+  this.addEventListener('keydown', editKeydown);
+}
+
+function editKeydown(e) {
+  if (e.key === 'Escape') {
+    e.preventDefault();
+    this.textContent = editingOriginal;
+    this.removeEventListener('keydown', editKeydown);
+    this.contentEditable = 'false';
+    this.classList.remove('editing');
+    this.blur();
+  } else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    this.blur();
+  }
+}
+
+function saveEdit() {
+  this.contentEditable = 'false';
+  this.classList.remove('editing');
+  this.removeEventListener('keydown', editKeydown);
+  const id = this.dataset.editId;
+  const newText = this.textContent.trim();
+  if (newText === editingOriginal.trim()) return;
+  if (newText === '') {
+    delete state.overrides[id];
+    showToast('تم استعادة النص الأصلي ✓');
+  } else {
+    state.overrides[id] = newText;
+    showToast('تم حفظ التعديل ✓');
+  }
+  updatePreview();
+}
+
+function resetAllOverrides() {
+  const count = Object.keys(state.overrides).length;
+  if (count === 0) {
+    showToast('لا توجد تعديلات للاستعادة', true);
+    return;
+  }
+  if (!confirm(`متأكد من إعادة جميع البنود لنصوصها الأصلية؟ (${count} تعديل)`)) return;
+  state.overrides = {};
+  updatePreview();
+  showToast('تم استعادة جميع النصوص الأصلية ✓');
+}
+
+// ===================== DOCX GENERATION =====================
+async function downloadWord() {
+  showToast('جاري إنشاء ملف Word...');
+  try {
+    syncStateFromInputs();
+    const blocks = buildContract();
+    const buffer = await generateDocx(blocks);
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+    saveAs(blob, `Ouja_Contract_${state.owners[0].name || 'Owner'}_${new Date().toISOString().split('T')[0]}.docx`);
+    showToast('تم تحميل العقد بنجاح ✓');
+  } catch (e) {
+    console.error(e);
+    showToast('خطأ في إنشاء الملف: ' + e.message, true);
+  }
+}
+
+async function generateDocx(blocks) {
+  const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
+          Header, Footer, AlignmentType, LevelFormat, TabStopType, TabStopPosition,
+          BorderStyle, WidthType, ShadingType, VerticalAlign, PageNumber, PageBreak,
+          UnderlineType } = docx;
+
+  const FONT = "Sakkal Majalla";
+  const FONT_LATIN = "Cambria";
+  const PRIMARY = "0B5345";
+  const ACCENT = "1E8449";
+  const DARK = "1A1A1A";
+  const GREY = "555555";
+  const LIGHT_BG = "EAF4EC";
+  const BORDER_COLOR = "BFBFBF";
+
+  const border = { style: BorderStyle.SINGLE, size: 4, color: BORDER_COLOR };
+  const allBorders = { top: border, bottom: border, left: border, right: border };
+
+  // Helper: read override if user customized the text via inline editing
+  function ov(id, def) { return state.overrides[id] !== undefined ? state.overrides[id] : def; }
+
+  function arP(text, opts = {}) {
+    return new Paragraph({
+      bidirectional: true,
+      alignment: opts.align || AlignmentType.JUSTIFIED,
+      spacing: { before: opts.before || 80, after: opts.after || 80, line: 320 },
+      indent: opts.indent || null,
+      pageBreakBefore: !!opts.pageBreak,
+      children: [new TextRun({ text, font: FONT, size: opts.size || 22, bold: !!opts.bold, color: opts.color || DARK, italics: !!opts.italic, rtl: true })],
+    });
+  }
+
+  function arPRuns(runs, opts = {}) {
+    return new Paragraph({
+      bidirectional: true,
+      alignment: opts.align || AlignmentType.JUSTIFIED,
+      spacing: { before: opts.before || 80, after: opts.after || 80, line: 320 },
+      indent: opts.indent || null,
+      children: runs.map(r => new TextRun({ text: r.text, font: r.font || FONT, size: r.size || 22, bold: !!r.bold, color: r.color || DARK, italics: !!r.italic, rtl: true })),
+    });
+  }
+
+  function chHeading(num, text) {
+    const prefix = ov('heading-prefix-' + num, `الفصل ${num}: `);
+    const title = ov('heading-title-' + num, text);
+    return new Paragraph({
+      bidirectional: true,
+      alignment: AlignmentType.RIGHT,
+      spacing: { before: 360, after: 180, line: 320 },
+      border: { bottom: { style: BorderStyle.SINGLE, size: 8, color: PRIMARY, space: 4 } },
+      children: [
+        new TextRun({ text: prefix, font: FONT, size: 30, bold: true, color: PRIMARY, rtl: true }),
+        new TextRun({ text: title, font: FONT, size: 30, bold: true, color: DARK, rtl: true }),
+      ],
+    });
+  }
+
+  function subH(text) {
+    return new Paragraph({
+      bidirectional: true,
+      alignment: AlignmentType.RIGHT,
+      spacing: { before: 200, after: 100 },
+      children: [new TextRun({ text, font: FONT, size: 24, bold: true, color: ACCENT, rtl: true })],
+    });
+  }
+
+  function clauseP(num, text) {
+    return new Paragraph({
+      bidirectional: true,
+      alignment: AlignmentType.JUSTIFIED,
+      spacing: { before: 100, after: 100, line: 320 },
+      children: [
+        new TextRun({ text: `${num} `, font: FONT, size: 22, bold: true, color: PRIMARY, rtl: true }),
+        new TextRun({ text, font: FONT, size: 22, color: DARK, rtl: true }),
+      ],
+    });
+  }
+
+  function bulletP(text) {
+    return new Paragraph({
+      bidirectional: true,
+      alignment: AlignmentType.JUSTIFIED,
+      spacing: { before: 40, after: 40, line: 300 },
+      indent: { right: 720, hanging: 240 },
+      children: [
+        new TextRun({ text: "•  ", font: FONT, size: 22, bold: true, color: ACCENT, rtl: true }),
+        new TextRun({ text, font: FONT, size: 22, color: DARK, rtl: true }),
+      ],
+    });
+  }
+
+  function defP(term, def) {
+    return new Paragraph({
+      bidirectional: true,
+      alignment: AlignmentType.JUSTIFIED,
+      spacing: { before: 80, after: 80, line: 320 },
+      children: [
+        new TextRun({ text: `«${term}»: `, font: FONT, size: 22, bold: true, color: PRIMARY, rtl: true }),
+        new TextRun({ text: def, font: FONT, size: 22, color: DARK, rtl: true }),
+      ],
+    });
+  }
+
+  function tCell(content, opts = {}) {
+    const align = opts.align || AlignmentType.RIGHT;
+    const para = new Paragraph({
+      bidirectional: true, alignment: align,
+      spacing: { before: 60, after: 60, line: 280 },
+      children: [new TextRun({ text: content, font: FONT, size: opts.size || 22, bold: !!opts.bold, color: opts.color || DARK, rtl: true })],
+    });
+    return new TableCell({
+      borders: allBorders,
+      width: { size: opts.width || 4500, type: WidthType.DXA },
+      shading: opts.shading ? { fill: opts.shading, type: ShadingType.CLEAR } : undefined,
+      margins: { top: 100, bottom: 100, left: 140, right: 140 },
+      verticalAlign: VerticalAlign.CENTER,
+      children: [para],
+    });
+  }
+
+  const children = [];
+
+  for (const b of blocks) {
+    switch (b.type) {
+      case 'cover':
+        children.push(new Paragraph({ bidirectional: true, alignment: AlignmentType.CENTER, spacing: { before: 1800, after: 100 }, children: [new TextRun({ text: ov('cover-brand-ar', "شركة عوجا سكن لإدارة الأملاك"), font: FONT, size: 36, bold: true, color: PRIMARY, rtl: true })] }));
+        children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 0, after: 60 }, children: [new TextRun({ text: ov('cover-brand-en', "OUJA RESIDENCE PROPERTY MANAGEMENT CO."), font: FONT_LATIN, size: 20, color: GREY })] }));
+        children.push(new Paragraph({ bidirectional: true, alignment: AlignmentType.CENTER, spacing: { before: 0, after: 1200 }, children: [new TextRun({ text: ov('cover-reg-line', `السجل الوطني الموحد ٧٠٥٠١٥٨٨١٠ — ${b.city}، المملكة العربية السعودية`), font: FONT, size: 20, color: GREY, rtl: true })] }));
+        children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 0, after: 400 }, border: { bottom: { style: BorderStyle.DOUBLE, size: 12, color: PRIMARY, space: 4 } }, children: [new TextRun("")] }));
+        children.push(new Paragraph({ bidirectional: true, alignment: AlignmentType.CENTER, spacing: { before: 200, after: 200 }, children: [new TextRun({ text: ov('cover-title-ar', "عقد إدارة وتشغيل وحدة عقارية"), font: FONT, size: 48, bold: true, color: DARK, rtl: true })] }));
+        children.push(new Paragraph({ bidirectional: true, alignment: AlignmentType.CENTER, spacing: { before: 0, after: 400 }, children: [new TextRun({ text: ov('cover-subtitle-ar', "بنظام التأجير اليومي / الأسبوعي / الشهري"), font: FONT, size: 36, color: ACCENT, rtl: true })] }));
+        children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 200, after: 600 }, children: [new TextRun({ text: ov('cover-title-en', "HOLIDAY HOMES MANAGEMENT AGREEMENT"), font: FONT_LATIN, size: 22, color: GREY })] }));
+        children.push(new Table({
+          width: { size: 6000, type: WidthType.DXA },
+          alignment: AlignmentType.CENTER,
+          columnWidths: [3000, 3000],
+          rows: [
+            new TableRow({ children: [tCell(ov('cover-lbl-date', "تاريخ التحرير"), { width: 3000, shading: LIGHT_BG, bold: true, color: PRIMARY }), tCell(`${b.date}م`, { width: 3000 })] }),
+            new TableRow({ children: [tCell(ov('cover-lbl-place', "مكان التحرير"), { width: 3000, shading: LIGHT_BG, bold: true, color: PRIMARY }), tCell(`${b.city}${ov('cover-place-suffix', '، المملكة العربية السعودية')}`, { width: 3000 })] }),
+            new TableRow({ children: [tCell(ov('cover-lbl-fee', "نسبة الإدارة"), { width: 3000, shading: LIGHT_BG, bold: true, color: PRIMARY }), tCell(`${b.mgmtFee}% ${ov('cover-fee-suffix', 'من صافي إيرادات الإيجار')}`, { width: 3000, bold: true })] }),
+            new TableRow({ children: [tCell(ov('cover-lbl-term', "مدة العقد"), { width: 3000, shading: LIGHT_BG, bold: true, color: PRIMARY }), tCell(`${ar(b.months)} ${ov('cover-term-suffix', 'شهراً ميلادياً قابل للتجديد التلقائي')}`, { width: 3000 })] }),
+          ]
+        }));
+        children.push(new Paragraph({ bidirectional: true, alignment: AlignmentType.CENTER, spacing: { before: 600, after: 100 }, children: [new TextRun({ text: "هذا العقد محرر باللغة العربية، وعند التعارض بين النسختين العربية والإنجليزية يكون النص العربي هو المرجع المعتمد قانوناً.", font: FONT, size: 18, color: GREY, italics: true, rtl: true })] }));
+        children.push(new Paragraph({ children: [new PageBreak()] }));
+        break;
+      case 'heading':
+        children.push(chHeading(b.num, b.text));
+        break;
+      case 'subheading':
+        children.push(subH(b.text));
+        break;
+      case 'p':
+        children.push(arP(b.text));
+        break;
+      case 'centerBold':
+        children.push(arPRuns([{ text: b.text, bold: true, color: PRIMARY, size: 24 }], { align: AlignmentType.CENTER, before: 280, after: 280 }));
+        break;
+      case 'clause':
+        children.push(clauseP(b.num, b.text));
+        break;
+      case 'bullets':
+        b.items.forEach(it => children.push(bulletP(it)));
+        break;
+      case 'definitions':
+        b.list.forEach(([t, d]) => children.push(defP(t, d)));
+        break;
+      case 'partyBox':
+        const pbId = 'partybox-title-' + (b.kind === 'owner' ? ('o'+(b.idx||0)) : 'm');
+        children.push(new Paragraph({ bidirectional: true, alignment: AlignmentType.RIGHT, spacing: { before: 200, after: 80 }, shading: { fill: LIGHT_BG, type: ShadingType.CLEAR }, children: [new TextRun({ text: ov(pbId, b.title), font: FONT, size: 26, bold: true, color: PRIMARY, rtl: true })] }));
+        children.push(partyTable(b));
+        break;
+      case 'propertyTable':
+        children.push(propTable(b.properties));
+        break;
+      case 'penaltyTable':
+        children.push(penTable(b.list));
+        break;
+      case 'signatures':
+        children.push(...sigBlocks(b));
+        break;
+    }
+  }
+
+  function partyTable(b) {
+    const p = b.party;
+    const isOwner = b.kind === 'owner';
+    const kp = isOwner ? 'owner-lbl-' : 'mgr-lbl-';
+    const rows = isOwner ? [
+      [ov(kp+'name', 'الاسم الكامل'), p.name || '________________________________________________'],
+      [ov(kp+'id', 'رقم الهوية / الإقامة'), p.id || '________________________________________________'],
+      [ov(kp+'nat', 'الجنسية'), p.nationality || '________________________________________________'],
+      [ov(kp+'phone', 'رقم الجوال'), p.phone || '________________________________________________'],
+      [ov(kp+'email', 'البريد الإلكتروني'), p.email || '________________________________________________'],
+      [ov(kp+'addr', 'العنوان الوطني'), p.address || '________________________________________________'],
+      [ov(kp+'ibSar', 'الآيبان (ريال سعودي)'), p.ibanSar || 'SA__ ____ ____ ____ ____ ____ ____'],
+      [ov(kp+'ibUsd', 'الحساب الدولاري (SNB)'), p.ibanUsd || 'SA__ ____ ____ ____ ____ ____ ____'],
+      [ov(kp+'cap', 'الصفة'), p.capacity + (p.agencyNo ? ` — رقم الوكالة: ${p.agencyNo}` : '')],
+      ...(b.showPercent ? [[ov(kp+'pct', 'نسبة الملكية'), (p.percent || 0) + '%']] : []),
+    ] : [
+      [ov(kp+'cname', 'الاسم التجاري'), p.name],
+      [ov(kp+'creg', 'السجل الوطني الموحد'), p.reg],
+      [ov(kp+'caddr', 'المركز الرئيسي'), p.address],
+      [ov(kp+'crep', 'الممثل القانوني'), `${p.rep} — ${p.repTitle}`],
+      [ov(kp+'cphone', 'الهاتف'), p.phone],
+      [ov(kp+'cemail', 'البريد الإلكتروني'), p.email],
+    ];
+    return new Table({
+      width: { size: 9000, type: WidthType.DXA },
+      columnWidths: [3000, 6000],
+      rows: rows.map(([k, v]) => new TableRow({ children: [
+        tCell(k, { width: 3000, shading: LIGHT_BG, bold: true, color: PRIMARY }),
+        tCell(v, { width: 6000 }),
+      ]})),
+    });
+  }
+
+  function propTable(props) {
+    const head = new TableRow({ tableHeader: true, children: [
+      tCell(ov('prop-th-unit', "الوحدة"), { width: 1200, shading: PRIMARY, bold: true, color: "FFFFFF", align: AlignmentType.CENTER }),
+      tCell(ov('prop-th-address', "العنوان"), { width: 2700, shading: PRIMARY, bold: true, color: "FFFFFF", align: AlignmentType.CENTER }),
+      tCell(ov('prop-th-type', "النوع"), { width: 1300, shading: PRIMARY, bold: true, color: "FFFFFF", align: AlignmentType.CENTER }),
+      tCell(ov('prop-th-beds', "الغرف"), { width: 800, shading: PRIMARY, bold: true, color: "FFFFFF", align: AlignmentType.CENTER }),
+      tCell(ov('prop-th-permit', "التصريح"), { width: 1500, shading: PRIMARY, bold: true, color: "FFFFFF", align: AlignmentType.CENTER }),
+      tCell(ov('prop-th-cleaning', "التنظيف"), { width: 1500, shading: PRIMARY, bold: true, color: "FFFFFF", align: AlignmentType.CENTER }),
+    ]});
+    const rows = props.map(p => new TableRow({ children: [
+      tCell(p.code || '-', { width: 1200, bold: true, align: AlignmentType.CENTER }),
+      tCell(p.address || '________________________', { width: 2700, align: AlignmentType.CENTER, size: 18 }),
+      tCell(p.type, { width: 1300, align: AlignmentType.CENTER }),
+      tCell(String(p.beds), { width: 800, align: AlignmentType.CENTER, bold: true }),
+      tCell(p.permit || '-', { width: 1500, align: AlignmentType.CENTER }),
+      tCell(`${fmtMoney(p.cleaningFee)} ر.س`, { width: 1500, align: AlignmentType.CENTER, bold: true }),
+    ]}));
+    return new Table({ width: { size: 9000, type: WidthType.DXA }, columnWidths: [1200, 2700, 1300, 800, 1500, 1500], rows: [head, ...rows] });
+  }
+
+  function penTable(list) {
+    const head = new TableRow({ tableHeader: true, children: [
+      tCell(ov('pen-th-type', "نوع الإخلال"), { width: 4500, shading: PRIMARY, bold: true, color: "FFFFFF", align: AlignmentType.CENTER }),
+      tCell(ov('pen-th-amount', "الشرط الجزائي"), { width: 3000, shading: PRIMARY, bold: true, color: "FFFFFF", align: AlignmentType.CENTER }),
+      tCell(ov('pen-th-ref', "المرجع"), { width: 1500, shading: PRIMARY, bold: true, color: "FFFFFF", align: AlignmentType.CENTER }),
+    ]});
+    const rows = list.map((p, i) => new TableRow({ children: [
+      tCell(ov('pen-row-type-'+i, p.type), { width: 4500 }),
+      tCell(ov('pen-row-amount-'+i, p.amount), { width: 3000, bold: true, align: AlignmentType.CENTER }),
+      tCell(p.ref, { width: 1500, align: AlignmentType.CENTER }),
+    ]}));
+    return new Table({ width: { size: 9000, type: WidthType.DXA }, columnWidths: [4500, 3000, 1500], rows: [head, ...rows] });
+  }
+
+  function sigBlocks(b) {
+    const out = [];
+    out.push(new Paragraph({ children: [new PageBreak()] }));
+    out.push(new Paragraph({ bidirectional: true, alignment: AlignmentType.CENTER, spacing: { before: 600, after: 400 }, border: { bottom: { style: BorderStyle.DOUBLE, size: 12, color: PRIMARY, space: 4 } }, children: [new TextRun({ text: ov('sig-title', "إقرار وتوقيع الطرفَين"), font: FONT, size: 36, bold: true, color: PRIMARY, rtl: true })] }));
+    out.push(arP(ov('sig-ack', "يقرّ كلٌ من الطرفَين بأنه قرأ كافة بنود هذا العقد بعناية، وفهم مضامينها فهماً تاماً، وأنه يبرمه عن رضاً واختيار."), { align: AlignmentType.JUSTIFIED, before: 240, after: 240 }));
+
+    const cellW = 9000 / (b.owners.length + 1);
+    const ownerCells = b.owners.map((o, i) => {
+      const defaultLabel = b.isMulti ? `المالك ${ar(i + 1)}` : 'الطرف الأول — المالك';
+      const title = ov('sig-owner-label-' + i, defaultLabel);
+      return new TableCell({
+        borders: allBorders, width: { size: cellW, type: WidthType.DXA }, shading: { fill: LIGHT_BG, type: ShadingType.CLEAR },
+        margins: { top: 120, bottom: 120, left: 140, right: 140 },
+        children: [
+          new Paragraph({ bidirectional: true, alignment: AlignmentType.CENTER, children: [new TextRun({ text: title, font: FONT, size: 24, bold: true, color: PRIMARY, rtl: true })] }),
+        ],
+      });
+    });
+    const mgrTitle = ov('sig-mgr-label', 'الطرف الثاني — المدير');
+    ownerCells.push(new TableCell({
+      borders: allBorders, width: { size: cellW, type: WidthType.DXA }, shading: { fill: LIGHT_BG, type: ShadingType.CLEAR },
+      margins: { top: 120, bottom: 120, left: 140, right: 140 },
+      children: [new Paragraph({ bidirectional: true, alignment: AlignmentType.CENTER, children: [new TextRun({ text: mgrTitle, font: FONT, size: 24, bold: true, color: PRIMARY, rtl: true })] })],
+    }));
+
+    const ownerDataCells = b.owners.map((o, i) => new TableCell({
+      borders: allBorders, width: { size: cellW, type: WidthType.DXA },
+      margins: { top: 120, bottom: 120, left: 140, right: 140 },
+      children: [
+        new Paragraph({ bidirectional: true, alignment: AlignmentType.RIGHT, spacing: { before: 60, after: 60 }, children: [new TextRun({ text: `${ov('sig-lbl-name', 'الاسم:')} ${o.name || '________________'}`, font: FONT, size: 20, rtl: true })] }),
+        new Paragraph({ bidirectional: true, alignment: AlignmentType.RIGHT, spacing: { before: 60, after: 60 }, children: [new TextRun({ text: `${ov('sig-lbl-id', 'الهوية:')} ${o.id || '________________'}`, font: FONT, size: 20, rtl: true })] }),
+        new Paragraph({ bidirectional: true, alignment: AlignmentType.RIGHT, spacing: { before: 200, after: 60 }, children: [new TextRun({ text: ov('sig-lbl-signature', 'التوقيع:'), font: FONT, size: 22, bold: true, rtl: true })] }),
+        new Paragraph({ bidirectional: true, alignment: AlignmentType.RIGHT, spacing: { before: 360, after: 60 }, border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: DARK, space: 4 } }, children: [new TextRun("")] }),
+        new Paragraph({ bidirectional: true, alignment: AlignmentType.RIGHT, spacing: { before: 100, after: 60 }, children: [new TextRun({ text: `${ov('sig-lbl-date', 'التاريخ:')} ____ / ____ / ____هـ`, font: FONT, size: 20, rtl: true })] }),
+      ],
+    }));
+    const mgrDataCell = new TableCell({
+      borders: allBorders, width: { size: cellW, type: WidthType.DXA },
+      margins: { top: 120, bottom: 120, left: 140, right: 140 },
+      children: [
+        new Paragraph({ bidirectional: true, alignment: AlignmentType.RIGHT, spacing: { before: 60, after: 60 }, children: [new TextRun({ text: `${ov('sig-lbl-company', 'الشركة:')} ${b.manager.name}`, font: FONT, size: 20, rtl: true })] }),
+        new Paragraph({ bidirectional: true, alignment: AlignmentType.RIGHT, spacing: { before: 60, after: 60 }, children: [new TextRun({ text: `${ov('sig-lbl-rep', 'الممثل:')} ${b.manager.rep}`, font: FONT, size: 20, rtl: true })] }),
+        new Paragraph({ bidirectional: true, alignment: AlignmentType.RIGHT, spacing: { before: 60, after: 60 }, children: [new TextRun({ text: `${ov('sig-lbl-capacity', 'الصفة:')} ${b.manager.repTitle}`, font: FONT, size: 20, rtl: true })] }),
+        new Paragraph({ bidirectional: true, alignment: AlignmentType.RIGHT, spacing: { before: 200, after: 60 }, children: [new TextRun({ text: ov('sig-lbl-signature-m', 'التوقيع:'), font: FONT, size: 22, bold: true, rtl: true })] }),
+        new Paragraph({ bidirectional: true, alignment: AlignmentType.RIGHT, spacing: { before: 360, after: 60 }, border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: DARK, space: 4 } }, children: [new TextRun("")] }),
+        new Paragraph({ bidirectional: true, alignment: AlignmentType.RIGHT, spacing: { before: 100, after: 60 }, children: [new TextRun({ text: ov('sig-stamp', 'الختم الرسمي للشركة'), font: FONT, size: 20, rtl: true })] }),
+      ],
+    });
+    const dataRow = new TableRow({ children: [...ownerDataCells, mgrDataCell] });
+
+    const colWidths = new Array(b.owners.length + 1).fill(cellW);
+    out.push(new Table({ width: { size: 9000, type: WidthType.DXA }, columnWidths: colWidths, rows: [new TableRow({ children: ownerCells }), dataRow] }));
+    return out;
+  }
+
+  const doc = new Document({
+    creator: "Ouja Residence Property Management Co.",
+    title: "عقد إدارة وحدة عقارية",
+    styles: { default: { document: { run: { font: FONT, size: 22 } } } },
+    sections: [{
+      properties: { page: { size: { width: 11906, height: 16838 }, margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 } } },
+      headers: { default: new Header({ children: [new Paragraph({
+        bidirectional: true, alignment: AlignmentType.LEFT,
+        border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: PRIMARY, space: 4 } },
+        tabStops: [{ type: TabStopType.LEFT, position: 0 }, { type: TabStopType.RIGHT, position: 9000 }],
+        children: [
+          new TextRun({ text: "OUJA RESIDENCE", font: FONT_LATIN, size: 18, bold: true, color: PRIMARY }),
+          new TextRun({ text: "\t" }),
+          new TextRun({ text: "عقد إدارة وحدة عقارية", font: FONT, size: 18, color: GREY, rtl: true }),
+        ]
+      })]}) },
+      footers: { default: new Footer({ children: [new Paragraph({
+        bidirectional: true, alignment: AlignmentType.CENTER,
+        border: { top: { style: BorderStyle.SINGLE, size: 4, color: BORDER_COLOR, space: 4 } },
+        spacing: { before: 100 },
+        children: [
+          new TextRun({ text: "صفحة ", font: FONT, size: 18, color: GREY, rtl: true }),
+          new TextRun({ children: [PageNumber.CURRENT], font: FONT, size: 18, color: GREY }),
+          new TextRun({ text: " من ", font: FONT, size: 18, color: GREY, rtl: true }),
+          new TextRun({ children: [PageNumber.TOTAL_PAGES], font: FONT, size: 18, color: GREY }),
+          new TextRun({ text: "   ·   شركة عوجا سكن لإدارة الأملاك  ·  info@oujares.com  ·  +966 53 377 9297", font: FONT, size: 16, color: GREY, rtl: true }),
+        ]
+      })]}) },
+      children: children
+    }]
+  });
+  return await Packer.toBlob(doc).then(blob => blob.arrayBuffer());
+}
+
+// ===================== UTILS =====================
+function copyHTML() {
+  const html = document.getElementById('preview').innerHTML;
+  navigator.clipboard.writeText(html).then(() => showToast('تم نسخ HTML للحافظة ✓'));
+}
+
+function loadSample() {
+  state.owners = [{
+    name: 'محمد بن عبدالعزيز السالم', id: '1012345678', nationality: 'سعودي',
+    phone: '0501234567', email: 'mohammed@example.com', address: 'الرياض، حي الياسمين، شارع الإمام، رقم 12',
+    ibanSar: 'SA1234567890123456789012', ibanUsd: 'SA9876543210987654321098',
+    capacity: 'مالك أصلي', percent: 100, agencyNo: '',
+  }];
+  state.properties = [{
+    code: 'A2', address: 'الرياض، حي المعذر الشمالي، شارع الأمير محمد بن عبدالعزيز، برج النخيل، الدور الرابع، شقة 402',
+    type: 'شقة سكنية', beds: 3, permit: '50040067', titleDeed: '424108001234', cleaningFee: 1000,
+  }];
+  document.getElementById('contractDate').value = todayIso();
+  renderAll();
+  showToast('تم تحميل البيانات التجريبية ✓');
+}
+
+function resetForm() {
+  if (!confirm('متأكد من إعادة تعيين كل البيانات؟')) return;
+  state = {
+    partyType: 'single', unitType: 'single', freq: 'monthly', currency: 'sar', exchangeRate: 3.741,
+    city: 'الرياض', contractDate: '',
+    owners: [createDefaultOwner()],
+    manager: { name: 'شركة عوجا سكن لإدارة الأملاك', reg: '7050158810', address: 'الرياض — حي المعذر الشمالي', rep: 'الأستاذ / فيصل بن نصار', repTitle: 'الرئيس التنفيذي', phone: '+966 53 377 9297', email: 'info@oujares.com' },
+    properties: [createDefaultProperty('A1')],
+    financial: { mgmtFee: 20, maintFloat: 500, cleaningVar: 30, insMin: 1000000 },
+    durations: { contractMonths: 12, renewNotice: 60, voluntaryNotice: 90, zeroBookings: 60, confYears: 2, ncMonths: 12, personalUseDays: 30, personalUseNotice: 15 },
+    penalties: { excl: 25000, conf: 15000, sol: 30000, ip: 10000, earlyMonths: 2, useExtra: 2000 },
+    customClauses: [],
+    overrides: {},
+    deleted: {},
+    deletedPanelOpen: false,
+  };
+  renderAll();
+  showToast('تم إعادة تعيين النموذج ✓');
+}
+
+function renderAll() {
+  renderOwners();
+  renderProperties();
+  renderCustomClauses();
+  updatePreview();
+}
+
+// ===================== INIT =====================
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('contractDate').value = todayIso();
+  document.querySelectorAll('input, select, textarea').forEach(el => {
+    el.addEventListener('input', updatePreview);
+    el.addEventListener('change', updatePreview);
+  });
+  renderAll();
+});
+
+// Print styles
+const printStyles = `@media print {
+  header, aside, .toolbar-bottom, .preview-header { display: none !important; }
+  .container { grid-template-columns: 1fr !important; padding: 0 !important; }
+  .preview-panel { box-shadow: none !important; position: static !important; max-height: none !important; }
+  .preview-body { padding: 0 !important; background: #fff !important; font-size: 11pt !important; }
+  body { background: #fff; }
+}`;
+const styleEl = document.createElement('style');
+styleEl.textContent = printStyles;
+document.head.appendChild(styleEl);
+</script>
+
+</body>
+</html>

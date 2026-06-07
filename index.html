@@ -182,6 +182,124 @@
   .btn-success:hover { background: var(--primary-light); }
   .btn-success:disabled { opacity: 0.5; cursor: not-allowed; }
 
+  /* Inline editable in preview */
+  .editable {
+    position: relative;
+    cursor: text;
+    border: 1px dashed transparent;
+    border-radius: 5px;
+    padding: 3px 6px;
+    margin: 2px 0;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .editable:hover {
+    background: rgba(11, 83, 69, 0.05);
+    border-color: rgba(11, 83, 69, 0.25);
+  }
+  .editable:hover::after {
+    content: '✏ انقر للتعديل';
+    position: absolute;
+    top: -22px;
+    right: 6px;
+    font-size: 10px;
+    background: var(--primary);
+    color: #fff;
+    padding: 2px 7px;
+    border-radius: 4px;
+    z-index: 10;
+    font-family: 'Tajawal', sans-serif;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .editable.editing {
+    background: #FFFBEB !important;
+    border-color: var(--warning) !important;
+    border-style: solid;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.15);
+  }
+  .editable.editing::after { display: none; }
+  .editable.modified {
+    background: rgba(30, 132, 73, 0.06);
+    border-color: rgba(30, 132, 73, 0.3);
+  }
+  .editable.modified::before {
+    content: '✓ معدّل';
+    position: absolute;
+    top: -10px;
+    right: 8px;
+    font-size: 10px;
+    background: var(--accent);
+    color: #fff;
+    padding: 1px 7px;
+    border-radius: 4px;
+    font-family: 'Tajawal', sans-serif;
+    z-index: 5;
+  }
+  .reset-clause, .delete-clause {
+    display: inline-block;
+    background: none;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    font-size: 11px;
+    cursor: pointer;
+    margin-right: 4px;
+    padding: 0;
+    line-height: 18px;
+    text-align: center;
+    vertical-align: middle;
+    font-family: 'Tajawal', sans-serif;
+    transition: all 0.2s;
+  }
+  .reset-clause { border: 1px solid var(--accent); color: var(--accent); }
+  .reset-clause:hover { background: var(--accent); color: #fff; }
+  .delete-clause { border: 1px solid var(--danger); color: var(--danger); opacity: 0; }
+  .editable:hover + .delete-clause,
+  .delete-clause:hover,
+  p:hover > .delete-clause,
+  div:hover > .delete-clause { opacity: 1; }
+  .delete-clause:hover { background: var(--danger); color: #fff; transform: scale(1.1); }
+  /* Always-visible delete on hover of clause container */
+  p:hover .delete-clause, div.bullet:hover .delete-clause, div.definition:hover .delete-clause { opacity: 1; }
+  /* Deleted items panel */
+  .deleted-panel {
+    background: linear-gradient(135deg, #FEF2F2, #FEE2E2);
+    border-right: 4px solid var(--danger);
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 14px;
+  }
+  .deleted-panel-header {
+    display: flex; justify-content: space-between; align-items: center;
+    cursor: pointer; font-weight: 700; color: var(--danger); font-size: 14px;
+  }
+  .deleted-panel.collapsed .deleted-panel-body { display: none; }
+  .deleted-panel-body { margin-top: 10px; max-height: 250px; overflow-y: auto; }
+  .deleted-item {
+    background: #fff; border: 1px solid #FCA5A5; border-radius: 6px;
+    padding: 8px 12px; margin-bottom: 6px; display: flex; gap: 10px;
+    align-items: flex-start; font-size: 12px; color: #555;
+  }
+  .deleted-item-text { flex: 1; line-height: 1.5; }
+  .deleted-item-text b { color: var(--primary); }
+  .deleted-restore {
+    background: var(--accent); color: #fff; border: none;
+    border-radius: 5px; padding: 5px 10px; cursor: pointer;
+    font-family: 'Tajawal', sans-serif; font-size: 12px; font-weight: 600;
+    white-space: nowrap;
+  }
+  .deleted-restore:hover { background: var(--primary-light); }
+  .edit-hint {
+    background: linear-gradient(135deg, #FFF9E6, #FEF3C7);
+    border-right: 4px solid var(--warning);
+    padding: 10px 14px;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 14px;
+    font-size: 13px;
+    color: #92400E;
+  }
+
   /* Helper */
   .help { font-size: 12px; color: var(--muted); margin-top: 4px; }
   .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
@@ -504,8 +622,8 @@
 <!-- ============== PREVIEW PANEL ============== -->
 <section class="preview-panel">
   <div class="preview-header">
-    <h3>📄 معاينة مباشرة</h3>
-    <span style="font-size:12px;opacity:0.8">يتحدث تلقائياً</span>
+    <h3>📄 معاينة مباشرة — انقر على أي بند للتعديل</h3>
+    <button class="btn btn-ghost" style="font-size:12px;padding:6px 12px" onclick="resetAllOverrides()">↺ إعادة كل البنود للأصلي</button>
   </div>
   <div class="preview-body" id="preview">
     <p style="text-align:center;color:#999;padding:40px">جاري التحميل...</p>
@@ -545,7 +663,10 @@ let state = {
   financial: { mgmtFee: 20, maintFloat: 500, cleaningVar: 30, insMin: 1000000 },
   durations: { contractMonths: 12, renewNotice: 60, voluntaryNotice: 90, zeroBookings: 60, confYears: 2, ncMonths: 12, personalUseDays: 30, personalUseNotice: 15 },
   penalties: { excl: 25000, conf: 15000, sol: 30000, ip: 10000, earlyMonths: 2, useExtra: 2000 },
-  customClauses: []
+  customClauses: [],
+  overrides: {}, // { 'clause-٢-١': 'custom text', 'def-العقد': 'custom def', 'bullet-X-0': 'custom bullet' }
+  deleted: {}, // { 'clause-٢-١': { text: 'original', label: 'البند ٢-١' } }
+  deletedPanelOpen: false,
 };
 
 function createDefaultOwner() {
@@ -1143,18 +1264,117 @@ function buildContract() {
   // Signatures
   blocks.push({ type: 'signatures', owners: owners, manager: s.manager, isMulti: isMulti });
 
+  // ====== Post-process: assign stable IDs and apply overrides ======
+  let lastClauseNum = '';
+  let preambleP = 0, preambleCB = 0, subhCount = 0;
+  blocks.forEach(b => {
+    if (b.type === 'clause') {
+      lastClauseNum = b.num;
+      b.id = 'clause-' + b.num;
+      b.label = 'البند ' + b.num;
+    } else if (b.type === 'bullets') {
+      b.items = b.items.map((it, idx) => {
+        const text = typeof it === 'string' ? it : it.text;
+        const id = 'bullet-' + (lastClauseNum || 'pre') + '-' + idx;
+        const override = s.overrides[id];
+        return { text: override || text, id, modified: !!override, default: text, label: 'نقطة (' + (lastClauseNum || 'تمهيد') + ')' };
+      });
+    } else if (b.type === 'definitions') {
+      b.list = b.list.map(([t, d]) => {
+        const id = 'def-' + t.replace(/\s+/g, '_');
+        const override = s.overrides[id];
+        return { term: t, def: override || d, id, modified: !!override, default: d, label: 'تعريف: ' + t };
+      });
+    } else if (b.type === 'p') {
+      b.id = 'p-' + (preambleP++);
+      b.label = 'فقرة';
+    } else if (b.type === 'centerBold') {
+      b.id = 'cb-' + (preambleCB++);
+      b.label = 'عبارة مركزية';
+    } else if (b.type === 'subheading') {
+      b.id = 'subh-' + (subhCount++);
+      b.label = 'عنوان فرعي: ' + b.text;
+    }
+    // Apply override
+    if (b.id && s.overrides[b.id]) {
+      b.defaultText = b.text;
+      b.text = s.overrides[b.id];
+      b.modified = true;
+    }
+  });
+
+  // ====== Filter out deleted blocks/items ======
+  blocks = blocks.filter(b => !(b.id && s.deleted[b.id]));
+  blocks.forEach(b => {
+    if (b.type === 'bullets') {
+      b.items = b.items.filter(it => !s.deleted[it.id]);
+    }
+    if (b.type === 'definitions') {
+      b.list = b.list.filter(d => !s.deleted[d.id]);
+    }
+  });
+  // Remove empty container blocks
+  blocks = blocks.filter(b => {
+    if (b.type === 'bullets' && b.items.length === 0) return false;
+    if (b.type === 'definitions' && b.list.length === 0) return false;
+    return true;
+  });
+
   return blocks;
 }
 
 // ===================== HTML PREVIEW RENDERER =====================
 function renderPreview() {
   const blocks = buildContract();
-  const html = blocks.map(renderBlock).join('');
+  const overrideCount = Object.keys(state.overrides).length;
+  const deletedCount = Object.keys(state.deleted).length;
+  const esc = s => (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  const hint = `<div class="edit-hint">
+    💡 <b>نصيحة:</b> انقر على نص أي بند لتعديله، أو اضغط 🗑 لحذفه. اضغط ESC للإلغاء.
+    ${overrideCount > 0 ? `<br>📝 عدد البنود المعدّلة: <b>${overrideCount}</b>` : ''}
+  </div>`;
+
+  let deletedPanel = '';
+  if (deletedCount > 0) {
+    const deletedItems = Object.entries(state.deleted).map(([id, info]) => `
+      <div class="deleted-item">
+        <div class="deleted-item-text"><b>${esc(info.label)}:</b> ${esc((info.text || '').substring(0, 120))}${info.text && info.text.length > 120 ? '…' : ''}</div>
+        <button class="deleted-restore" data-restore-id="${id}">↺ استعادة</button>
+      </div>
+    `).join('');
+    deletedPanel = `<div class="deleted-panel ${state.deletedPanelOpen ? '' : 'collapsed'}" id="deletedPanel">
+      <div class="deleted-panel-header" onclick="toggleDeletedPanel()">
+        <span>🗑 العناصر المحذوفة (${deletedCount})</span>
+        <span style="font-size:13px;font-weight:400">${state.deletedPanelOpen ? 'إخفاء ▴' : 'عرض ▾'}</span>
+      </div>
+      <div class="deleted-panel-body">
+        ${deletedItems}
+        <div style="text-align:left;margin-top:10px">
+          <button class="deleted-restore" style="background:var(--primary)" onclick="restoreAllDeleted()">↺ استعادة جميع المحذوفات</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  const html = hint + deletedPanel + blocks.map(renderBlock).join('');
   document.getElementById('preview').innerHTML = html;
+}
+
+function toggleDeletedPanel() {
+  state.deletedPanelOpen = !state.deletedPanelOpen;
+  updatePreview();
 }
 
 function renderBlock(b) {
   const esc = s => (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const editable = (id, text, modified, label) => {
+    const cls = 'editable editable-text' + (modified ? ' modified' : '');
+    const resetBtn = modified ? `<button class="reset-clause" data-reset-id="${id}" title="استعادة النص الأصلي">↺</button>` : '';
+    const delBtn = `<button class="delete-clause" data-delete-id="${id}" data-delete-label="${esc(label || 'بند')}" title="حذف هذا البند">🗑</button>`;
+    return `${resetBtn}${delBtn}<span class="${cls}" data-edit-id="${id}">${esc(text)}</span>`;
+  };
+
   switch (b.type) {
     case 'cover':
       return `<div class="cover">
@@ -1175,17 +1395,17 @@ function renderBlock(b) {
     case 'heading':
       return `<h2>الفصل ${esc(b.num)}: ${esc(b.text)}</h2>`;
     case 'subheading':
-      return `<h3>${esc(b.text)}</h3>`;
+      return `<h3>${editable(b.id, b.text, b.modified, b.label)}</h3>`;
     case 'p':
-      return `<p>${esc(b.text)}</p>`;
+      return `<p>${editable(b.id, b.text, b.modified, b.label)}</p>`;
     case 'centerBold':
-      return `<p style="text-align:center;font-weight:700;color:var(--primary);margin:14px 0">${esc(b.text)}</p>`;
+      return `<p style="text-align:center;font-weight:700;color:var(--primary);margin:14px 0">${editable(b.id, b.text, b.modified, b.label)}</p>`;
     case 'clause':
-      return `<p><span class="clause-num">${esc(b.num)}</span> ${esc(b.text)}</p>`;
+      return `<p><span class="clause-num">${esc(b.num)}</span> ${editable(b.id, b.text, b.modified, b.label)}</p>`;
     case 'bullets':
-      return b.items.map(it => `<div class="bullet">${esc(it)}</div>`).join('');
+      return b.items.map(it => `<div class="bullet">${editable(it.id, it.text, it.modified, it.label)}</div>`).join('');
     case 'definitions':
-      return b.list.map(([t, d]) => `<div class="definition"><b>«${esc(t)}»:</b> ${esc(d)}</div>`).join('');
+      return b.list.map(d => `<div class="definition"><b>«${esc(d.term)}»:</b> ${editable(d.id, d.def, d.modified, d.label)}</div>`).join('');
     case 'partyBox':
       return renderPartyBox(b);
     case 'propertyTable':
@@ -1263,6 +1483,129 @@ function renderSignatures(b) {
 
 function updatePreview() {
   renderPreview();
+  setTimeout(attachInlineEdit, 0);
+}
+
+// ===================== INLINE EDITING =====================
+let editingOriginal = '';
+
+function attachInlineEdit() {
+  document.querySelectorAll('#preview .editable-text').forEach(el => {
+    if (el.dataset.bound) return;
+    el.dataset.bound = '1';
+    el.addEventListener('click', startEdit);
+  });
+  document.querySelectorAll('#preview .reset-clause').forEach(btn => {
+    if (btn.dataset.bound) return;
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = btn.dataset.resetId;
+      delete state.overrides[id];
+      updatePreview();
+      showToast('تم استعادة النص الأصلي ✓');
+    });
+  });
+  document.querySelectorAll('#preview .delete-clause').forEach(btn => {
+    if (btn.dataset.bound) return;
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = btn.dataset.deleteId;
+      const label = btn.dataset.deleteLabel || 'بند';
+      // capture original text from the sibling editable-text span
+      const textSpan = btn.parentElement.querySelector('.editable-text[data-edit-id="' + id + '"]');
+      const text = textSpan ? textSpan.textContent.trim() : '';
+      if (!confirm(`متأكد من حذف "${label}"؟\nيمكنك استعادته من لوحة "العناصر المحذوفة" في أعلى المعاينة.`)) return;
+      state.deleted[id] = { label, text };
+      state.deletedPanelOpen = true;
+      updatePreview();
+      showToast(`تم حذف ${label} ✓`);
+    });
+  });
+  document.querySelectorAll('#preview .deleted-restore[data-restore-id]').forEach(btn => {
+    if (btn.dataset.bound) return;
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = btn.dataset.restoreId;
+      delete state.deleted[id];
+      if (Object.keys(state.deleted).length === 0) state.deletedPanelOpen = false;
+      updatePreview();
+      showToast('تم استعادة البند ✓');
+    });
+  });
+}
+
+function restoreAllDeleted() {
+  const count = Object.keys(state.deleted).length;
+  if (count === 0) return;
+  if (!confirm(`متأكد من استعادة جميع البنود المحذوفة؟ (${count} عنصر)`)) return;
+  state.deleted = {};
+  state.deletedPanelOpen = false;
+  updatePreview();
+  showToast('تم استعادة جميع البنود ✓');
+}
+
+function startEdit(e) {
+  e.stopPropagation();
+  if (this.contentEditable === 'true') return;
+  editingOriginal = this.textContent;
+  this.contentEditable = 'true';
+  this.classList.add('editing');
+  this.focus();
+  // place cursor at end
+  const range = document.createRange();
+  range.selectNodeContents(this);
+  range.collapse(false);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  this.addEventListener('blur', saveEdit, { once: true });
+  this.addEventListener('keydown', editKeydown);
+}
+
+function editKeydown(e) {
+  if (e.key === 'Escape') {
+    e.preventDefault();
+    this.textContent = editingOriginal;
+    this.removeEventListener('keydown', editKeydown);
+    this.contentEditable = 'false';
+    this.classList.remove('editing');
+    this.blur();
+  } else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    this.blur();
+  }
+}
+
+function saveEdit() {
+  this.contentEditable = 'false';
+  this.classList.remove('editing');
+  this.removeEventListener('keydown', editKeydown);
+  const id = this.dataset.editId;
+  const newText = this.textContent.trim();
+  if (newText === editingOriginal.trim()) return;
+  if (newText === '') {
+    delete state.overrides[id];
+    showToast('تم استعادة النص الأصلي ✓');
+  } else {
+    state.overrides[id] = newText;
+    showToast('تم حفظ التعديل ✓');
+  }
+  updatePreview();
+}
+
+function resetAllOverrides() {
+  const count = Object.keys(state.overrides).length;
+  if (count === 0) {
+    showToast('لا توجد تعديلات للاستعادة', true);
+    return;
+  }
+  if (!confirm(`متأكد من إعادة جميع البنود لنصوصها الأصلية؟ (${count} تعديل)`)) return;
+  state.overrides = {};
+  updatePreview();
+  showToast('تم استعادة جميع النصوص الأصلية ✓');
 }
 
 // ===================== DOCX GENERATION =====================
@@ -1645,7 +1988,10 @@ function resetForm() {
     financial: { mgmtFee: 20, maintFloat: 500, cleaningVar: 30, insMin: 1000000 },
     durations: { contractMonths: 12, renewNotice: 60, voluntaryNotice: 90, zeroBookings: 60, confYears: 2, ncMonths: 12, personalUseDays: 30, personalUseNotice: 15 },
     penalties: { excl: 25000, conf: 15000, sol: 30000, ip: 10000, earlyMonths: 2, useExtra: 2000 },
-    customClauses: []
+    customClauses: [],
+    overrides: {},
+    deleted: {},
+    deletedPanelOpen: false,
   };
   renderAll();
   showToast('تم إعادة تعيين النموذج ✓');

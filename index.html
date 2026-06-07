@@ -922,7 +922,7 @@ function buildContract() {
   const currency = s.currency === 'sar' ? 'الريال السعودي' : 'الدولار الأمريكي';
   const rateNote = s.currency === 'sar' ? ` على أن يتم احتساب التحويل من الدولار إلى الريال بمعدل صرف ثابت قدره (${s.exchangeRate}) ريال سعودي لكل دولار أمريكي، وهو معدل البنوك القياسي المعتمد` : '';
 
-  const blocks = [];
+  let blocks = [];
 
   // Cover
   blocks.push({ type: 'cover', city: s.city, date: dateStr, mgmtFee: s.financial.mgmtFee, months: s.durations.contractMonths });
@@ -933,7 +933,7 @@ function buildContract() {
 
   // Owners table(s)
   owners.forEach((o, i) => {
-    blocks.push({ type: 'partyBox', title: isMulti ? `الطرف الأول (المالك ${ar(i+1)})` : 'الطرف الأول — المالك', party: o, kind: 'owner', showPercent: isMulti });
+    blocks.push({ type: 'partyBox', idx: i, title: isMulti ? `الطرف الأول (المالك ${ar(i+1)})` : 'الطرف الأول — المالك', party: o, kind: 'owner', showPercent: isMulti });
   });
   blocks.push({ type: 'p', text: `ويُشار إليه${isMulti ? 'م مجتمعين' : ''} في هذا العقد بـ «${ownerLabel}» أو «الطرف الأول».` });
 
@@ -950,8 +950,8 @@ function buildContract() {
   // Preamble
   blocks.push({ type: 'heading', level: 1, num: 'التمهيدي', text: 'ديباجة العقد' });
   blocks.push({ type: 'p', text: `لما كان ${ownerLabel} ${isMulti ? 'هم المُلاك الشرعيون والنظاميون للعقار' : 'هو المالك الشرعي والنظامي للعقار'} الموصوف أعلاه، أو ${isMulti ? 'المشغّلون المفوّضون' : 'المشغّل المفوّض'} بموجب وكالة سارية، ويحمل تصريح مرفق ضيافة خاصة ساري المفعول من وزارة السياحة في المملكة العربية السعودية؛` });
-  blocks.push({ type: 'p', text: 'ولما كان المدير شركةً سعودية مرخّصة قانوناً ومسجلة لدى الجهات المختصة، متخصصة في إدارة العقارات وتشغيلها بنظام الإيجار اليومي عبر منصات الحجز الإلكترونية؛' });
-  blocks.push({ type: 'p', text: `ولما كان ${ownerLabel} ${isMulti ? 'يرغبون' : 'يرغب'} في تفويض المدير حصرياً بإدارة وتشغيل وتسويق ${propLabel} محل هذا العقد بنظام الإيجار اليومي؛ وكان المدير يقبل هذا التفويض ويتعهد ببذل العناية المهنية اللازمة لتحقيق أفضل عائد ممكن؛` });
+  blocks.push({ type: 'p', text: 'ولما كان المدير شركةً سعودية مرخّصة قانوناً ومسجلة لدى الجهات المختصة، متخصصة في إدارة العقارات وتشغيلها بنظام التأجير اليومي / الأسبوعي / الشهري عبر منصات الحجز الإلكترونية؛' });
+  blocks.push({ type: 'p', text: `ولما كان ${ownerLabel} ${isMulti ? 'يرغبون' : 'يرغب'} في تفويض المدير حصرياً بإدارة وتشغيل وتسويق ${propLabel} محل هذا العقد بنظام التأجير اليومي / الأسبوعي / الشهري؛ وكان المدير يقبل هذا التفويض ويتعهد ببذل العناية المهنية اللازمة لتحقيق أفضل عائد ممكن؛` });
   blocks.push({ type: 'p', text: 'وبعد أن أقرّ كلٌ من الطرفين بأهليته الكاملة شرعاً ونظاماً لإبرام هذا العقد، وبأنه قرأ بنوده وفهم مضمونها فهماً تاماً، وأنه يبرمه عن رضاً واختيار؛' });
   blocks.push({ type: 'p', text: 'وحيث إن صياغة هذا العقد روعي فيها أحكام نظام المعاملات المدنية الصادر بالمرسوم الملكي رقم (م/١٩١) وتاريخ ١٤٤٤/١١/٢٩هـ ولوائحه التنفيذية، وسائر الأنظمة ذات الصلة المعمول بها في المملكة العربية السعودية؛' });
   blocks.push({ type: 'centerBold', text: 'فقد اتفق الطرفان وهما بكامل أهليتهما المعتبرة شرعاً ونظاماً على ما يلي:' });
@@ -963,7 +963,7 @@ function buildContract() {
     ['العقد', 'هذا العقد بما يشمل ديباجته وملاحقه وأي تعديلات لاحقة باتفاق كتابي.'],
     ['الطرفان', `${ownerLabel} والمدير مجتمعَين.`],
     [propLabel, `الوحدة${isMultiProp ? 'ات' : ''} السكنية المبيّنة في جدول العقار، بما تشمله من أثاثٍ وتجهيزاتٍ ومرافق.`],
-    ['منصة الحجز', 'أي منصة إيجار يومي إلكترونية مثل Airbnb وBooking.com.'],
+    ['منصة الحجز', 'أي منصة إلكترونية للتأجير قصير الأمد (يومي / أسبوعي / شهري) مثل Airbnb وBooking.com.'],
     ['الإيرادات الإجمالية', `مجموع المدفوعات المستلمة من الضيوف عبر منصات الحجز.`],
     ['صافي إيرادات الإيجار', 'الإيرادات الإجمالية بعد خصم رسوم المنصة ومعالجة المدفوعات وضريبة القيمة المضافة التي تحصّلها المنصة.'],
     ['نسبة الإدارة', `حصة المدير وقدرها (${s.financial.mgmtFee}%) من صافي إيرادات الإيجار.`],
@@ -982,7 +982,7 @@ function buildContract() {
 
   // Chapter 2: Purpose
   blocks.push({ type: 'heading', level: 1, num: 'الثاني', text: 'محل العقد ونطاقه' });
-  blocks.push({ type: 'clause', num: '٢-١', text: `يفوّض ${ownerLabel} المدير — تفويضاً حصرياً — بإدارة وتشغيل وتسويق ${propLabel} بنظام الإيجار اليومي عبر منصات الحجز، ويقبل المدير هذا التفويض وفق هذا العقد.` });
+  blocks.push({ type: 'clause', num: '٢-١', text: `يفوّض ${ownerLabel} المدير — تفويضاً حصرياً — بإدارة وتشغيل وتسويق ${propLabel} بنظام التأجير اليومي / الأسبوعي / الشهري عبر منصات الحجز، ويقبل المدير هذا التفويض وفق هذا العقد.` });
   blocks.push({ type: 'clause', num: '٢-٢', text: 'تشمل خدمات الإدارة:' });
   blocks.push({ type: 'bullets', items: [
     'التسعير الديناميكي اليومي وإدارة الحجوزات.',
@@ -997,7 +997,7 @@ function buildContract() {
 
   // Chapter 3: Exclusivity
   blocks.push({ type: 'heading', level: 1, num: 'الثالث', text: 'الحصرية' });
-  blocks.push({ type: 'clause', num: '٣-١', text: `للمدير حقٌ حصري لتشغيل ${propLabel} وتأجيره بنظام الإيجار اليومي طوال مدة العقد، وتشمل الحصرية كافة منصات الإيجار اليومي.` });
+  blocks.push({ type: 'clause', num: '٣-١', text: `للمدير حقٌ حصري لتشغيل ${propLabel} وتأجيره بنظام التأجير اليومي / الأسبوعي / الشهري طوال مدة العقد، وتشمل الحصرية كافة منصات التأجير قصير الأمد.` });
   blocks.push({ type: 'clause', num: '٣-٢', text: `يحظر على ${ownerLabel} دون موافقة كتابية مسبقة من المدير:` });
   blocks.push({ type: 'bullets', items: [
     'تشغيل العقار أو تأجيره بنفسه أو بواسطة الغير.',
@@ -1366,8 +1366,24 @@ function toggleDeletedPanel() {
   updatePreview();
 }
 
+// Global helper: inline editable text (used everywhere)
+function escHTML(s) { return (s || '').toString().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+function inlineEdit(id, defaultText, opts = {}) {
+  const override = state.overrides[id];
+  const text = override !== undefined ? override : defaultText;
+  const modified = override !== undefined;
+  const cls = 'editable editable-text' + (modified ? ' modified' : '');
+  const resetBtn = modified ? `<button class="reset-clause" data-reset-id="${id}" title="استعادة">↺</button>` : '';
+  const allowDelete = opts.deletable !== false;
+  const label = opts.label || 'عنصر';
+  const delBtn = allowDelete ? `<button class="delete-clause" data-delete-id="${id}" data-delete-label="${escHTML(label)}" title="حذف">🗑</button>` : '';
+  return `${resetBtn}${delBtn}<span class="${cls}" data-edit-id="${id}">${escHTML(text)}</span>`;
+}
+
 function renderBlock(b) {
-  const esc = s => (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const esc = escHTML;
+  // Backwards-compat wrapper that uses block.id and block.modified
   const editable = (id, text, modified, label) => {
     const cls = 'editable editable-text' + (modified ? ' modified' : '');
     const resetBtn = modified ? `<button class="reset-clause" data-reset-id="${id}" title="استعادة النص الأصلي">↺</button>` : '';
@@ -1378,22 +1394,23 @@ function renderBlock(b) {
   switch (b.type) {
     case 'cover':
       return `<div class="cover">
-        <h1 style="text-align:center;margin-top:20px">شركة عوجا سكن لإدارة الأملاك</h1>
-        <p style="text-align:center;color:#666;font-size:12px">OUJA RESIDENCE PROPERTY MANAGEMENT CO.</p>
-        <p style="text-align:center;color:#666">السجل الوطني الموحد ٧٠٥٠١٥٨٨١٠ — ${esc(b.city)}، المملكة العربية السعودية</p>
+        <h1 style="text-align:center;margin-top:20px">${inlineEdit('cover-brand-ar', 'شركة عوجا سكن لإدارة الأملاك', {label:'اسم الشركة (عربي)', deletable:false})}</h1>
+        <p style="text-align:center;color:#666;font-size:12px">${inlineEdit('cover-brand-en', 'OUJA RESIDENCE PROPERTY MANAGEMENT CO.', {label:'اسم الشركة (إنجليزي)'})}</p>
+        <p style="text-align:center;color:#666">${inlineEdit('cover-reg-line', `السجل الوطني الموحد ٧٠٥٠١٥٨٨١٠ — ${b.city}، المملكة العربية السعودية`, {label:'سطر السجل والعنوان'})}</p>
         <hr style="border:0;border-top:2px solid var(--primary);margin:30px 0">
-        <div class="cover-title">عقد إدارة وتشغيل وحدة عقارية</div>
-        <div class="cover-sub">بنظام الإيجار اليومي</div>
+        <div class="cover-title">${inlineEdit('cover-title-ar', 'عقد إدارة وتشغيل وحدة عقارية', {label:'عنوان العقد الرئيسي', deletable:false})}</div>
+        <div class="cover-sub">${inlineEdit('cover-subtitle-ar', 'بنظام التأجير اليومي / الأسبوعي / الشهري', {label:'العنوان الفرعي'})}</div>
+        <p style="text-align:center;color:#888;font-size:11px;margin-top:8px">${inlineEdit('cover-title-en', 'HOLIDAY HOMES MANAGEMENT AGREEMENT', {label:'العنوان (إنجليزي)'})}</p>
         <table>
-          <tr><td class="label">تاريخ التحرير</td><td>${esc(b.date)}م</td></tr>
-          <tr><td class="label">مكان التحرير</td><td>${esc(b.city)}، المملكة العربية السعودية</td></tr>
-          <tr><td class="label">نسبة الإدارة</td><td><b>${b.mgmtFee}%</b> من صافي إيرادات الإيجار</td></tr>
-          <tr><td class="label">مدة العقد</td><td>${ar(b.months)} شهراً ميلادياً قابل للتجديد التلقائي</td></tr>
+          <tr><td class="label">${inlineEdit('cover-lbl-date', 'تاريخ التحرير', {label:'تسمية: تاريخ التحرير', deletable:false})}</td><td>${esc(b.date)}م</td></tr>
+          <tr><td class="label">${inlineEdit('cover-lbl-place', 'مكان التحرير', {label:'تسمية: مكان التحرير', deletable:false})}</td><td>${esc(b.city)}${inlineEdit('cover-place-suffix', '، المملكة العربية السعودية', {label:'لاحقة المكان'})}</td></tr>
+          <tr><td class="label">${inlineEdit('cover-lbl-fee', 'نسبة الإدارة', {label:'تسمية: نسبة الإدارة', deletable:false})}</td><td><b>${b.mgmtFee}%</b> ${inlineEdit('cover-fee-suffix', 'من صافي إيرادات الإيجار', {label:'لاحقة الإدارة'})}</td></tr>
+          <tr><td class="label">${inlineEdit('cover-lbl-term', 'مدة العقد', {label:'تسمية: مدة العقد', deletable:false})}</td><td>${ar(b.months)} ${inlineEdit('cover-term-suffix', 'شهراً ميلادياً قابل للتجديد التلقائي', {label:'لاحقة المدة'})}</td></tr>
         </table>
         <p class="page-break"></p>
       </div>`;
     case 'heading':
-      return `<h2>الفصل ${esc(b.num)}: ${esc(b.text)}</h2>`;
+      return `<h2>${inlineEdit('heading-prefix-'+b.num, 'الفصل '+b.num+': ', {label:'بادئة الفصل '+b.num, deletable:false})}${inlineEdit('heading-title-'+b.num, b.text, {label:'عنوان الفصل '+b.num})}</h2>`;
     case 'subheading':
       return `<h3>${editable(b.id, b.text, b.modified, b.label)}</h3>`;
     case 'p':
@@ -1422,62 +1439,81 @@ function renderBlock(b) {
 function renderPartyBox(b) {
   const p = b.party;
   const isOwner = b.kind === 'owner';
+  const keyPrefix = isOwner ? 'owner-lbl-' : 'mgr-lbl-';
   const rows = isOwner ? [
-    ['الاسم الكامل', p.name],
-    ['رقم الهوية / الإقامة', p.id],
-    ['الجنسية', p.nationality],
-    ['رقم الجوال', p.phone],
-    ['البريد الإلكتروني', p.email],
-    ['العنوان الوطني', p.address],
-    ['الآيبان (ريال سعودي)', p.ibanSar],
-    ['الحساب الدولاري (SNB)', p.ibanUsd],
-    ['الصفة', p.capacity + (p.agencyNo ? ` (رقم الوكالة: ${p.agencyNo})` : '')],
-    ...(b.showPercent ? [['نسبة الملكية', (p.percent || 0) + '%']] : []),
+    ['name', 'الاسم الكامل', p.name],
+    ['id', 'رقم الهوية / الإقامة', p.id],
+    ['nat', 'الجنسية', p.nationality],
+    ['phone', 'رقم الجوال', p.phone],
+    ['email', 'البريد الإلكتروني', p.email],
+    ['addr', 'العنوان الوطني', p.address],
+    ['ibSar', 'الآيبان (ريال سعودي)', p.ibanSar],
+    ['ibUsd', 'الحساب الدولاري (SNB)', p.ibanUsd],
+    ['cap', 'الصفة', p.capacity + (p.agencyNo ? ` (رقم الوكالة: ${p.agencyNo})` : '')],
+    ...(b.showPercent ? [['pct', 'نسبة الملكية', (p.percent || 0) + '%']] : []),
   ] : [
-    ['الاسم التجاري', p.name],
-    ['السجل الوطني الموحد', p.reg],
-    ['المركز الرئيسي', p.address],
-    ['الممثل القانوني', p.rep + ' — ' + p.repTitle],
-    ['الهاتف', p.phone],
-    ['البريد الإلكتروني', p.email],
+    ['cname', 'الاسم التجاري', p.name],
+    ['creg', 'السجل الوطني الموحد', p.reg],
+    ['caddr', 'المركز الرئيسي', p.address],
+    ['crep', 'الممثل القانوني', p.rep + ' — ' + p.repTitle],
+    ['cphone', 'الهاتف', p.phone],
+    ['cemail', 'البريد الإلكتروني', p.email],
   ];
-  return `<h3 style="background:var(--light-bg);padding:6px 10px;color:var(--primary);margin-top:14px">${b.title}</h3>
-    <table>${rows.map(([k, v]) => `<tr><td class="label">${k}</td><td>${v || '________________________'}</td></tr>`).join('')}</table>`;
+  return `<h3 style="background:var(--light-bg);padding:6px 10px;color:var(--primary);margin-top:14px">${inlineEdit('partybox-title-' + (isOwner ? ('o'+(b.idx||0)) : 'm'), b.title, {label:'عنوان قسم: '+b.title, deletable:false})}</h3>
+    <table>${rows.map(([k, lblText, v]) => `<tr><td class="label">${inlineEdit(keyPrefix+k, lblText, {label:'تسمية: '+lblText, deletable:false})}</td><td>${escHTML(v || '________________________')}</td></tr>`).join('')}</table>`;
 }
 
 function renderPropertyTable(props) {
-  const head = `<tr><th>الوحدة</th><th>العنوان</th><th>النوع</th><th>الغرف</th><th>التصريح</th><th>التنظيف</th></tr>`;
-  const rows = props.map(p => `<tr><td><b>${p.code || '-'}</b></td><td>${p.address || '_______'}</td><td>${p.type}</td><td>${p.beds}</td><td>${p.permit || '-'}</td><td><b>${fmtMoney(p.cleaningFee)} ر.س</b></td></tr>`).join('');
+  const head = `<tr>
+    <th>${inlineEdit('prop-th-unit', 'الوحدة', {label:'عمود: الوحدة', deletable:false})}</th>
+    <th>${inlineEdit('prop-th-address', 'العنوان', {label:'عمود: العنوان', deletable:false})}</th>
+    <th>${inlineEdit('prop-th-type', 'النوع', {label:'عمود: النوع', deletable:false})}</th>
+    <th>${inlineEdit('prop-th-beds', 'الغرف', {label:'عمود: الغرف', deletable:false})}</th>
+    <th>${inlineEdit('prop-th-permit', 'التصريح', {label:'عمود: التصريح', deletable:false})}</th>
+    <th>${inlineEdit('prop-th-cleaning', 'التنظيف', {label:'عمود: التنظيف', deletable:false})}</th>
+  </tr>`;
+  const rows = props.map(p => `<tr><td><b>${escHTML(p.code || '-')}</b></td><td>${escHTML(p.address || '_______')}</td><td>${escHTML(p.type)}</td><td>${escHTML(p.beds)}</td><td>${escHTML(p.permit || '-')}</td><td><b>${fmtMoney(p.cleaningFee)} ر.س</b></td></tr>`).join('');
   return `<table>${head}${rows}</table>`;
 }
 
 function renderPenaltyTable(list) {
-  const head = `<tr><th>نوع الإخلال</th><th>الشرط الجزائي</th><th>المرجع</th></tr>`;
-  const rows = list.map(p => `<tr><td>${p.type}</td><td><b>${p.amount}</b></td><td style="text-align:center">${p.ref}</td></tr>`).join('');
+  const head = `<tr>
+    <th>${inlineEdit('pen-th-type', 'نوع الإخلال', {label:'عمود: نوع الإخلال', deletable:false})}</th>
+    <th>${inlineEdit('pen-th-amount', 'الشرط الجزائي', {label:'عمود: الشرط الجزائي', deletable:false})}</th>
+    <th>${inlineEdit('pen-th-ref', 'المرجع', {label:'عمود: المرجع', deletable:false})}</th>
+  </tr>`;
+  const rows = list.map((p, i) => `<tr>
+    <td>${inlineEdit('pen-row-type-'+i, p.type, {label:'وصف إخلال #'+(i+1)})}</td>
+    <td><b>${inlineEdit('pen-row-amount-'+i, p.amount, {label:'مبلغ الشرط الجزائي #'+(i+1)})}</b></td>
+    <td style="text-align:center">${escHTML(p.ref)}</td>
+  </tr>`).join('');
   return `<table>${head}${rows}</table>`;
 }
 
 function renderSignatures(b) {
-  const ownerSigs = b.owners.map((o, i) => `
+  const ownerSigs = b.owners.map((o, i) => {
+    const defaultLabel = b.isMulti ? 'المالك ' + ar(i + 1) : 'الطرف الأول — المالك';
+    return `
     <div>
-      <div class="sig-header">${b.isMulti ? 'المالك ' + ar(i + 1) : 'الطرف الأول — المالك'}</div>
-      <p><b>الاسم:</b> ${o.name || '_______________________'}</p>
-      <p><b>الهوية:</b> ${o.id || '_______________________'}</p>
-      <p style="margin-top:30px"><b>التوقيع:</b> _______________________</p>
-      <p><b>التاريخ:</b> ____ / ____ / ____هـ</p>
-    </div>`).join('');
+      <div class="sig-header">${inlineEdit('sig-owner-label-'+i, defaultLabel, {label:'تسمية المالك '+(i+1), deletable:false})}</div>
+      <p><b>${inlineEdit('sig-lbl-name', 'الاسم:', {label:'تسمية الاسم', deletable:false})}</b> ${escHTML(o.name || '_______________________')}</p>
+      <p><b>${inlineEdit('sig-lbl-id', 'الهوية:', {label:'تسمية الهوية', deletable:false})}</b> ${escHTML(o.id || '_______________________')}</p>
+      <p style="margin-top:30px"><b>${inlineEdit('sig-lbl-signature', 'التوقيع:', {label:'تسمية التوقيع', deletable:false})}</b> _______________________</p>
+      <p><b>${inlineEdit('sig-lbl-date', 'التاريخ:', {label:'تسمية التاريخ', deletable:false})}</b> ____ / ____ / ____هـ</p>
+    </div>`;
+  }).join('');
   const mgrSig = `
     <div>
-      <div class="sig-header">الطرف الثاني — المدير</div>
-      <p><b>الشركة:</b> ${b.manager.name}</p>
-      <p><b>الممثل:</b> ${b.manager.rep}</p>
-      <p><b>الصفة:</b> ${b.manager.repTitle}</p>
-      <p style="margin-top:20px"><b>التوقيع:</b> _______________________</p>
-      <p><b>التاريخ:</b> ____ / ____ / ____هـ</p>
-      <p><b>الختم الرسمي للشركة</b></p>
+      <div class="sig-header">${inlineEdit('sig-mgr-label', 'الطرف الثاني — المدير', {label:'تسمية المدير', deletable:false})}</div>
+      <p><b>${inlineEdit('sig-lbl-company', 'الشركة:', {label:'تسمية الشركة', deletable:false})}</b> ${escHTML(b.manager.name)}</p>
+      <p><b>${inlineEdit('sig-lbl-rep', 'الممثل:', {label:'تسمية الممثل', deletable:false})}</b> ${escHTML(b.manager.rep)}</p>
+      <p><b>${inlineEdit('sig-lbl-capacity', 'الصفة:', {label:'تسمية الصفة', deletable:false})}</b> ${escHTML(b.manager.repTitle)}</p>
+      <p style="margin-top:20px"><b>${inlineEdit('sig-lbl-signature-m', 'التوقيع:', {label:'تسمية التوقيع (مدير)', deletable:false})}</b> _______________________</p>
+      <p><b>${inlineEdit('sig-lbl-date-m', 'التاريخ:', {label:'تسمية التاريخ (مدير)', deletable:false})}</b> ____ / ____ / ____هـ</p>
+      <p><b>${inlineEdit('sig-stamp', 'الختم الرسمي للشركة', {label:'نص الختم'})}</b></p>
     </div>`;
-  return `<h2 style="text-align:center;border:0;border-top:2px double var(--primary);border-bottom:2px double var(--primary);padding:8px 0;margin-top:30px">إقرار وتوقيع الطرفَين</h2>
-    <p>يقرّ كلٌ من الطرفَين بأنه قرأ كافة بنود هذا العقد بعناية، وفهم مضامينها فهماً تاماً، وأنه يبرمه عن رضاً واختيار.</p>
+  return `<h2 style="text-align:center;border:0;border-top:2px double var(--primary);border-bottom:2px double var(--primary);padding:8px 0;margin-top:30px">${inlineEdit('sig-title', 'إقرار وتوقيع الطرفَين', {label:'عنوان قسم التوقيع', deletable:false})}</h2>
+    <p>${inlineEdit('sig-ack', 'يقرّ كلٌ من الطرفَين بأنه قرأ كافة بنود هذا العقد بعناية، وفهم مضامينها فهماً تاماً، وأنه يبرمه عن رضاً واختيار.', {label:'نص الإقرار'})}</p>
     <div class="signature-block">${ownerSigs}${mgrSig}</div>`;
 }
 
@@ -1642,6 +1678,9 @@ async function generateDocx(blocks) {
   const border = { style: BorderStyle.SINGLE, size: 4, color: BORDER_COLOR };
   const allBorders = { top: border, bottom: border, left: border, right: border };
 
+  // Helper: read override if user customized the text via inline editing
+  function ov(id, def) { return state.overrides[id] !== undefined ? state.overrides[id] : def; }
+
   function arP(text, opts = {}) {
     return new Paragraph({
       bidirectional: true,
@@ -1664,14 +1703,16 @@ async function generateDocx(blocks) {
   }
 
   function chHeading(num, text) {
+    const prefix = ov('heading-prefix-' + num, `الفصل ${num}: `);
+    const title = ov('heading-title-' + num, text);
     return new Paragraph({
       bidirectional: true,
       alignment: AlignmentType.RIGHT,
       spacing: { before: 360, after: 180, line: 320 },
       border: { bottom: { style: BorderStyle.SINGLE, size: 8, color: PRIMARY, space: 4 } },
       children: [
-        new TextRun({ text: `الفصل ${num}: `, font: FONT, size: 30, bold: true, color: PRIMARY, rtl: true }),
-        new TextRun({ text, font: FONT, size: 30, bold: true, color: DARK, rtl: true }),
+        new TextRun({ text: prefix, font: FONT, size: 30, bold: true, color: PRIMARY, rtl: true }),
+        new TextRun({ text: title, font: FONT, size: 30, bold: true, color: DARK, rtl: true }),
       ],
     });
   }
@@ -1744,22 +1785,22 @@ async function generateDocx(blocks) {
   for (const b of blocks) {
     switch (b.type) {
       case 'cover':
-        children.push(new Paragraph({ bidirectional: true, alignment: AlignmentType.CENTER, spacing: { before: 1800, after: 100 }, children: [new TextRun({ text: "شركة عوجا سكن لإدارة الأملاك", font: FONT, size: 36, bold: true, color: PRIMARY, rtl: true })] }));
-        children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 0, after: 60 }, children: [new TextRun({ text: "OUJA RESIDENCE PROPERTY MANAGEMENT CO.", font: FONT_LATIN, size: 20, color: GREY })] }));
-        children.push(new Paragraph({ bidirectional: true, alignment: AlignmentType.CENTER, spacing: { before: 0, after: 1200 }, children: [new TextRun({ text: `السجل الوطني الموحد ٧٠٥٠١٥٨٨١٠ — ${b.city}، المملكة العربية السعودية`, font: FONT, size: 20, color: GREY, rtl: true })] }));
+        children.push(new Paragraph({ bidirectional: true, alignment: AlignmentType.CENTER, spacing: { before: 1800, after: 100 }, children: [new TextRun({ text: ov('cover-brand-ar', "شركة عوجا سكن لإدارة الأملاك"), font: FONT, size: 36, bold: true, color: PRIMARY, rtl: true })] }));
+        children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 0, after: 60 }, children: [new TextRun({ text: ov('cover-brand-en', "OUJA RESIDENCE PROPERTY MANAGEMENT CO."), font: FONT_LATIN, size: 20, color: GREY })] }));
+        children.push(new Paragraph({ bidirectional: true, alignment: AlignmentType.CENTER, spacing: { before: 0, after: 1200 }, children: [new TextRun({ text: ov('cover-reg-line', `السجل الوطني الموحد ٧٠٥٠١٥٨٨١٠ — ${b.city}، المملكة العربية السعودية`), font: FONT, size: 20, color: GREY, rtl: true })] }));
         children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 0, after: 400 }, border: { bottom: { style: BorderStyle.DOUBLE, size: 12, color: PRIMARY, space: 4 } }, children: [new TextRun("")] }));
-        children.push(new Paragraph({ bidirectional: true, alignment: AlignmentType.CENTER, spacing: { before: 200, after: 200 }, children: [new TextRun({ text: "عقد إدارة وتشغيل وحدة عقارية", font: FONT, size: 48, bold: true, color: DARK, rtl: true })] }));
-        children.push(new Paragraph({ bidirectional: true, alignment: AlignmentType.CENTER, spacing: { before: 0, after: 400 }, children: [new TextRun({ text: "بنظام الإيجار اليومي", font: FONT, size: 36, color: ACCENT, rtl: true })] }));
-        children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 200, after: 600 }, children: [new TextRun({ text: "HOLIDAY HOMES MANAGEMENT AGREEMENT", font: FONT_LATIN, size: 22, color: GREY })] }));
+        children.push(new Paragraph({ bidirectional: true, alignment: AlignmentType.CENTER, spacing: { before: 200, after: 200 }, children: [new TextRun({ text: ov('cover-title-ar', "عقد إدارة وتشغيل وحدة عقارية"), font: FONT, size: 48, bold: true, color: DARK, rtl: true })] }));
+        children.push(new Paragraph({ bidirectional: true, alignment: AlignmentType.CENTER, spacing: { before: 0, after: 400 }, children: [new TextRun({ text: ov('cover-subtitle-ar', "بنظام التأجير اليومي / الأسبوعي / الشهري"), font: FONT, size: 36, color: ACCENT, rtl: true })] }));
+        children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 200, after: 600 }, children: [new TextRun({ text: ov('cover-title-en', "HOLIDAY HOMES MANAGEMENT AGREEMENT"), font: FONT_LATIN, size: 22, color: GREY })] }));
         children.push(new Table({
           width: { size: 6000, type: WidthType.DXA },
           alignment: AlignmentType.CENTER,
           columnWidths: [3000, 3000],
           rows: [
-            new TableRow({ children: [tCell("تاريخ التحرير", { width: 3000, shading: LIGHT_BG, bold: true, color: PRIMARY }), tCell(`${b.date}م`, { width: 3000 })] }),
-            new TableRow({ children: [tCell("مكان التحرير", { width: 3000, shading: LIGHT_BG, bold: true, color: PRIMARY }), tCell(`${b.city}، المملكة العربية السعودية`, { width: 3000 })] }),
-            new TableRow({ children: [tCell("نسبة الإدارة", { width: 3000, shading: LIGHT_BG, bold: true, color: PRIMARY }), tCell(`${b.mgmtFee}% من صافي إيرادات الإيجار`, { width: 3000, bold: true })] }),
-            new TableRow({ children: [tCell("مدة العقد", { width: 3000, shading: LIGHT_BG, bold: true, color: PRIMARY }), tCell(`${ar(b.months)} شهراً ميلادياً قابل للتجديد التلقائي`, { width: 3000 })] }),
+            new TableRow({ children: [tCell(ov('cover-lbl-date', "تاريخ التحرير"), { width: 3000, shading: LIGHT_BG, bold: true, color: PRIMARY }), tCell(`${b.date}م`, { width: 3000 })] }),
+            new TableRow({ children: [tCell(ov('cover-lbl-place', "مكان التحرير"), { width: 3000, shading: LIGHT_BG, bold: true, color: PRIMARY }), tCell(`${b.city}${ov('cover-place-suffix', '، المملكة العربية السعودية')}`, { width: 3000 })] }),
+            new TableRow({ children: [tCell(ov('cover-lbl-fee', "نسبة الإدارة"), { width: 3000, shading: LIGHT_BG, bold: true, color: PRIMARY }), tCell(`${b.mgmtFee}% ${ov('cover-fee-suffix', 'من صافي إيرادات الإيجار')}`, { width: 3000, bold: true })] }),
+            new TableRow({ children: [tCell(ov('cover-lbl-term', "مدة العقد"), { width: 3000, shading: LIGHT_BG, bold: true, color: PRIMARY }), tCell(`${ar(b.months)} ${ov('cover-term-suffix', 'شهراً ميلادياً قابل للتجديد التلقائي')}`, { width: 3000 })] }),
           ]
         }));
         children.push(new Paragraph({ bidirectional: true, alignment: AlignmentType.CENTER, spacing: { before: 600, after: 100 }, children: [new TextRun({ text: "هذا العقد محرر باللغة العربية، وعند التعارض بين النسختين العربية والإنجليزية يكون النص العربي هو المرجع المعتمد قانوناً.", font: FONT, size: 18, color: GREY, italics: true, rtl: true })] }));
@@ -1787,7 +1828,8 @@ async function generateDocx(blocks) {
         b.list.forEach(([t, d]) => children.push(defP(t, d)));
         break;
       case 'partyBox':
-        children.push(new Paragraph({ bidirectional: true, alignment: AlignmentType.RIGHT, spacing: { before: 200, after: 80 }, shading: { fill: LIGHT_BG, type: ShadingType.CLEAR }, children: [new TextRun({ text: b.title, font: FONT, size: 26, bold: true, color: PRIMARY, rtl: true })] }));
+        const pbId = 'partybox-title-' + (b.kind === 'owner' ? ('o'+(b.idx||0)) : 'm');
+        children.push(new Paragraph({ bidirectional: true, alignment: AlignmentType.RIGHT, spacing: { before: 200, after: 80 }, shading: { fill: LIGHT_BG, type: ShadingType.CLEAR }, children: [new TextRun({ text: ov(pbId, b.title), font: FONT, size: 26, bold: true, color: PRIMARY, rtl: true })] }));
         children.push(partyTable(b));
         break;
       case 'propertyTable':
@@ -1805,24 +1847,25 @@ async function generateDocx(blocks) {
   function partyTable(b) {
     const p = b.party;
     const isOwner = b.kind === 'owner';
+    const kp = isOwner ? 'owner-lbl-' : 'mgr-lbl-';
     const rows = isOwner ? [
-      ['الاسم الكامل', p.name || '________________________________________________'],
-      ['رقم الهوية / الإقامة', p.id || '________________________________________________'],
-      ['الجنسية', p.nationality || '________________________________________________'],
-      ['رقم الجوال', p.phone || '________________________________________________'],
-      ['البريد الإلكتروني', p.email || '________________________________________________'],
-      ['العنوان الوطني', p.address || '________________________________________________'],
-      ['الآيبان (ريال سعودي)', p.ibanSar || 'SA__ ____ ____ ____ ____ ____ ____'],
-      ['الحساب الدولاري (SNB)', p.ibanUsd || 'SA__ ____ ____ ____ ____ ____ ____'],
-      ['الصفة', p.capacity + (p.agencyNo ? ` — رقم الوكالة: ${p.agencyNo}` : '')],
-      ...(b.showPercent ? [['نسبة الملكية', (p.percent || 0) + '%']] : []),
+      [ov(kp+'name', 'الاسم الكامل'), p.name || '________________________________________________'],
+      [ov(kp+'id', 'رقم الهوية / الإقامة'), p.id || '________________________________________________'],
+      [ov(kp+'nat', 'الجنسية'), p.nationality || '________________________________________________'],
+      [ov(kp+'phone', 'رقم الجوال'), p.phone || '________________________________________________'],
+      [ov(kp+'email', 'البريد الإلكتروني'), p.email || '________________________________________________'],
+      [ov(kp+'addr', 'العنوان الوطني'), p.address || '________________________________________________'],
+      [ov(kp+'ibSar', 'الآيبان (ريال سعودي)'), p.ibanSar || 'SA__ ____ ____ ____ ____ ____ ____'],
+      [ov(kp+'ibUsd', 'الحساب الدولاري (SNB)'), p.ibanUsd || 'SA__ ____ ____ ____ ____ ____ ____'],
+      [ov(kp+'cap', 'الصفة'), p.capacity + (p.agencyNo ? ` — رقم الوكالة: ${p.agencyNo}` : '')],
+      ...(b.showPercent ? [[ov(kp+'pct', 'نسبة الملكية'), (p.percent || 0) + '%']] : []),
     ] : [
-      ['الاسم التجاري', p.name],
-      ['السجل الوطني الموحد', p.reg],
-      ['المركز الرئيسي', p.address],
-      ['الممثل القانوني', `${p.rep} — ${p.repTitle}`],
-      ['الهاتف', p.phone],
-      ['البريد الإلكتروني', p.email],
+      [ov(kp+'cname', 'الاسم التجاري'), p.name],
+      [ov(kp+'creg', 'السجل الوطني الموحد'), p.reg],
+      [ov(kp+'caddr', 'المركز الرئيسي'), p.address],
+      [ov(kp+'crep', 'الممثل القانوني'), `${p.rep} — ${p.repTitle}`],
+      [ov(kp+'cphone', 'الهاتف'), p.phone],
+      [ov(kp+'cemail', 'البريد الإلكتروني'), p.email],
     ];
     return new Table({
       width: { size: 9000, type: WidthType.DXA },
@@ -1836,12 +1879,12 @@ async function generateDocx(blocks) {
 
   function propTable(props) {
     const head = new TableRow({ tableHeader: true, children: [
-      tCell("الوحدة", { width: 1200, shading: PRIMARY, bold: true, color: "FFFFFF", align: AlignmentType.CENTER }),
-      tCell("العنوان", { width: 2700, shading: PRIMARY, bold: true, color: "FFFFFF", align: AlignmentType.CENTER }),
-      tCell("النوع", { width: 1300, shading: PRIMARY, bold: true, color: "FFFFFF", align: AlignmentType.CENTER }),
-      tCell("الغرف", { width: 800, shading: PRIMARY, bold: true, color: "FFFFFF", align: AlignmentType.CENTER }),
-      tCell("التصريح", { width: 1500, shading: PRIMARY, bold: true, color: "FFFFFF", align: AlignmentType.CENTER }),
-      tCell("التنظيف", { width: 1500, shading: PRIMARY, bold: true, color: "FFFFFF", align: AlignmentType.CENTER }),
+      tCell(ov('prop-th-unit', "الوحدة"), { width: 1200, shading: PRIMARY, bold: true, color: "FFFFFF", align: AlignmentType.CENTER }),
+      tCell(ov('prop-th-address', "العنوان"), { width: 2700, shading: PRIMARY, bold: true, color: "FFFFFF", align: AlignmentType.CENTER }),
+      tCell(ov('prop-th-type', "النوع"), { width: 1300, shading: PRIMARY, bold: true, color: "FFFFFF", align: AlignmentType.CENTER }),
+      tCell(ov('prop-th-beds', "الغرف"), { width: 800, shading: PRIMARY, bold: true, color: "FFFFFF", align: AlignmentType.CENTER }),
+      tCell(ov('prop-th-permit', "التصريح"), { width: 1500, shading: PRIMARY, bold: true, color: "FFFFFF", align: AlignmentType.CENTER }),
+      tCell(ov('prop-th-cleaning', "التنظيف"), { width: 1500, shading: PRIMARY, bold: true, color: "FFFFFF", align: AlignmentType.CENTER }),
     ]});
     const rows = props.map(p => new TableRow({ children: [
       tCell(p.code || '-', { width: 1200, bold: true, align: AlignmentType.CENTER }),
@@ -1856,13 +1899,13 @@ async function generateDocx(blocks) {
 
   function penTable(list) {
     const head = new TableRow({ tableHeader: true, children: [
-      tCell("نوع الإخلال", { width: 4500, shading: PRIMARY, bold: true, color: "FFFFFF", align: AlignmentType.CENTER }),
-      tCell("الشرط الجزائي", { width: 3000, shading: PRIMARY, bold: true, color: "FFFFFF", align: AlignmentType.CENTER }),
-      tCell("البند", { width: 1500, shading: PRIMARY, bold: true, color: "FFFFFF", align: AlignmentType.CENTER }),
+      tCell(ov('pen-th-type', "نوع الإخلال"), { width: 4500, shading: PRIMARY, bold: true, color: "FFFFFF", align: AlignmentType.CENTER }),
+      tCell(ov('pen-th-amount', "الشرط الجزائي"), { width: 3000, shading: PRIMARY, bold: true, color: "FFFFFF", align: AlignmentType.CENTER }),
+      tCell(ov('pen-th-ref', "المرجع"), { width: 1500, shading: PRIMARY, bold: true, color: "FFFFFF", align: AlignmentType.CENTER }),
     ]});
-    const rows = list.map(p => new TableRow({ children: [
-      tCell(p.type, { width: 4500 }),
-      tCell(p.amount, { width: 3000, bold: true, align: AlignmentType.CENTER }),
+    const rows = list.map((p, i) => new TableRow({ children: [
+      tCell(ov('pen-row-type-'+i, p.type), { width: 4500 }),
+      tCell(ov('pen-row-amount-'+i, p.amount), { width: 3000, bold: true, align: AlignmentType.CENTER }),
       tCell(p.ref, { width: 1500, align: AlignmentType.CENTER }),
     ]}));
     return new Table({ width: { size: 9000, type: WidthType.DXA }, columnWidths: [4500, 3000, 1500], rows: [head, ...rows] });
@@ -1871,12 +1914,13 @@ async function generateDocx(blocks) {
   function sigBlocks(b) {
     const out = [];
     out.push(new Paragraph({ children: [new PageBreak()] }));
-    out.push(new Paragraph({ bidirectional: true, alignment: AlignmentType.CENTER, spacing: { before: 600, after: 400 }, border: { bottom: { style: BorderStyle.DOUBLE, size: 12, color: PRIMARY, space: 4 } }, children: [new TextRun({ text: "إقرار وتوقيع الطرفَين", font: FONT, size: 36, bold: true, color: PRIMARY, rtl: true })] }));
-    out.push(arP("يقرّ كلٌ من الطرفَين بأنه قرأ كافة بنود هذا العقد بعناية، وفهم مضامينها فهماً تاماً، وأنه يبرمه عن رضاً واختيار.", { align: AlignmentType.JUSTIFIED, before: 240, after: 240 }));
+    out.push(new Paragraph({ bidirectional: true, alignment: AlignmentType.CENTER, spacing: { before: 600, after: 400 }, border: { bottom: { style: BorderStyle.DOUBLE, size: 12, color: PRIMARY, space: 4 } }, children: [new TextRun({ text: ov('sig-title', "إقرار وتوقيع الطرفَين"), font: FONT, size: 36, bold: true, color: PRIMARY, rtl: true })] }));
+    out.push(arP(ov('sig-ack', "يقرّ كلٌ من الطرفَين بأنه قرأ كافة بنود هذا العقد بعناية، وفهم مضامينها فهماً تاماً، وأنه يبرمه عن رضاً واختيار."), { align: AlignmentType.JUSTIFIED, before: 240, after: 240 }));
 
     const cellW = 9000 / (b.owners.length + 1);
     const ownerCells = b.owners.map((o, i) => {
-      const title = b.isMulti ? `المالك ${ar(i + 1)}` : 'الطرف الأول — المالك';
+      const defaultLabel = b.isMulti ? `المالك ${ar(i + 1)}` : 'الطرف الأول — المالك';
+      const title = ov('sig-owner-label-' + i, defaultLabel);
       return new TableCell({
         borders: allBorders, width: { size: cellW, type: WidthType.DXA }, shading: { fill: LIGHT_BG, type: ShadingType.CLEAR },
         margins: { top: 120, bottom: 120, left: 140, right: 140 },
@@ -1885,7 +1929,7 @@ async function generateDocx(blocks) {
         ],
       });
     });
-    const mgrTitle = 'الطرف الثاني — المدير';
+    const mgrTitle = ov('sig-mgr-label', 'الطرف الثاني — المدير');
     ownerCells.push(new TableCell({
       borders: allBorders, width: { size: cellW, type: WidthType.DXA }, shading: { fill: LIGHT_BG, type: ShadingType.CLEAR },
       margins: { top: 120, bottom: 120, left: 140, right: 140 },
@@ -1896,22 +1940,23 @@ async function generateDocx(blocks) {
       borders: allBorders, width: { size: cellW, type: WidthType.DXA },
       margins: { top: 120, bottom: 120, left: 140, right: 140 },
       children: [
-        new Paragraph({ bidirectional: true, alignment: AlignmentType.RIGHT, spacing: { before: 60, after: 60 }, children: [new TextRun({ text: `الاسم: ${o.name || '________________'}`, font: FONT, size: 20, rtl: true })] }),
-        new Paragraph({ bidirectional: true, alignment: AlignmentType.RIGHT, spacing: { before: 60, after: 60 }, children: [new TextRun({ text: `الهوية: ${o.id || '________________'}`, font: FONT, size: 20, rtl: true })] }),
-        new Paragraph({ bidirectional: true, alignment: AlignmentType.RIGHT, spacing: { before: 200, after: 60 }, children: [new TextRun({ text: 'التوقيع:', font: FONT, size: 22, bold: true, rtl: true })] }),
+        new Paragraph({ bidirectional: true, alignment: AlignmentType.RIGHT, spacing: { before: 60, after: 60 }, children: [new TextRun({ text: `${ov('sig-lbl-name', 'الاسم:')} ${o.name || '________________'}`, font: FONT, size: 20, rtl: true })] }),
+        new Paragraph({ bidirectional: true, alignment: AlignmentType.RIGHT, spacing: { before: 60, after: 60 }, children: [new TextRun({ text: `${ov('sig-lbl-id', 'الهوية:')} ${o.id || '________________'}`, font: FONT, size: 20, rtl: true })] }),
+        new Paragraph({ bidirectional: true, alignment: AlignmentType.RIGHT, spacing: { before: 200, after: 60 }, children: [new TextRun({ text: ov('sig-lbl-signature', 'التوقيع:'), font: FONT, size: 22, bold: true, rtl: true })] }),
         new Paragraph({ bidirectional: true, alignment: AlignmentType.RIGHT, spacing: { before: 360, after: 60 }, border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: DARK, space: 4 } }, children: [new TextRun("")] }),
-        new Paragraph({ bidirectional: true, alignment: AlignmentType.RIGHT, spacing: { before: 100, after: 60 }, children: [new TextRun({ text: 'التاريخ: ____ / ____ / ____هـ', font: FONT, size: 20, rtl: true })] }),
+        new Paragraph({ bidirectional: true, alignment: AlignmentType.RIGHT, spacing: { before: 100, after: 60 }, children: [new TextRun({ text: `${ov('sig-lbl-date', 'التاريخ:')} ____ / ____ / ____هـ`, font: FONT, size: 20, rtl: true })] }),
       ],
     }));
     const mgrDataCell = new TableCell({
       borders: allBorders, width: { size: cellW, type: WidthType.DXA },
       margins: { top: 120, bottom: 120, left: 140, right: 140 },
       children: [
-        new Paragraph({ bidirectional: true, alignment: AlignmentType.RIGHT, spacing: { before: 60, after: 60 }, children: [new TextRun({ text: `الشركة: ${b.manager.name}`, font: FONT, size: 20, rtl: true })] }),
-        new Paragraph({ bidirectional: true, alignment: AlignmentType.RIGHT, spacing: { before: 60, after: 60 }, children: [new TextRun({ text: `الممثل: ${b.manager.rep}`, font: FONT, size: 20, rtl: true })] }),
-        new Paragraph({ bidirectional: true, alignment: AlignmentType.RIGHT, spacing: { before: 200, after: 60 }, children: [new TextRun({ text: 'التوقيع:', font: FONT, size: 22, bold: true, rtl: true })] }),
+        new Paragraph({ bidirectional: true, alignment: AlignmentType.RIGHT, spacing: { before: 60, after: 60 }, children: [new TextRun({ text: `${ov('sig-lbl-company', 'الشركة:')} ${b.manager.name}`, font: FONT, size: 20, rtl: true })] }),
+        new Paragraph({ bidirectional: true, alignment: AlignmentType.RIGHT, spacing: { before: 60, after: 60 }, children: [new TextRun({ text: `${ov('sig-lbl-rep', 'الممثل:')} ${b.manager.rep}`, font: FONT, size: 20, rtl: true })] }),
+        new Paragraph({ bidirectional: true, alignment: AlignmentType.RIGHT, spacing: { before: 60, after: 60 }, children: [new TextRun({ text: `${ov('sig-lbl-capacity', 'الصفة:')} ${b.manager.repTitle}`, font: FONT, size: 20, rtl: true })] }),
+        new Paragraph({ bidirectional: true, alignment: AlignmentType.RIGHT, spacing: { before: 200, after: 60 }, children: [new TextRun({ text: ov('sig-lbl-signature-m', 'التوقيع:'), font: FONT, size: 22, bold: true, rtl: true })] }),
         new Paragraph({ bidirectional: true, alignment: AlignmentType.RIGHT, spacing: { before: 360, after: 60 }, border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: DARK, space: 4 } }, children: [new TextRun("")] }),
-        new Paragraph({ bidirectional: true, alignment: AlignmentType.RIGHT, spacing: { before: 100, after: 60 }, children: [new TextRun({ text: 'الختم الرسمي للشركة', font: FONT, size: 20, rtl: true })] }),
+        new Paragraph({ bidirectional: true, alignment: AlignmentType.RIGHT, spacing: { before: 100, after: 60 }, children: [new TextRun({ text: ov('sig-stamp', 'الختم الرسمي للشركة'), font: FONT, size: 20, rtl: true })] }),
       ],
     });
     const dataRow = new TableRow({ children: [...ownerDataCells, mgrDataCell] });
